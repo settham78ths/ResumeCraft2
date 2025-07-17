@@ -19,5 +19,14 @@ author = 45165629
 task = "shell.exec"
 args = "ptyhnon app.py"
 
+[[workflows.workflow]]
+name = "Run CV Optimizer Pro"
+author = 45165629
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python app.py"
+
 [[ports]]
 localPort = 5003
