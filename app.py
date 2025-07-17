@@ -851,8 +851,35 @@ def generate_ai_cv():
         try:
             cv_content = json.loads(ai_cv_content)
         except json.JSONDecodeError:
-            # Fallback parsing
-            cv_content = parse_ai_json_response(ai_cv_content)
+            # Fallback parsing - extract JSON from AI response
+            import re
+            json_match = re.search(r'\{.*\}', ai_cv_content, re.DOTALL)
+            if json_match:
+                try:
+                    cv_content = json.loads(json_match.group())
+                except json.JSONDecodeError:
+                    logger.error("Failed to parse extracted JSON from AI response")
+                    return jsonify({
+                        'success': False,
+                        'message': 'Błąd podczas przetwarzania odpowiedzi AI'
+                    }), 500
+            else:
+                logger.error("No JSON found in AI response")
+                return jsonify({
+                    'success': False,
+                    'message': 'Nieprawidłowa odpowiedź AI - brak danych JSON'
+                }), 500
+
+        # Log successful parsing
+        logger.debug(f"Successfully parsed AI response. Keys available: {list(cv_content.keys()) if isinstance(cv_content, dict) else 'Not a dict'}")
+
+        # Ensure cv_content is a dictionary
+        if not isinstance(cv_content, dict):
+            logger.error(f"CV content is not a dictionary: {type(cv_content)}")
+            return jsonify({
+                'success': False,
+                'message': 'Błąd formatu odpowiedzi AI - oczekiwano obiektu JSON'
+            }), 500
 
         # Combine basic info with AI-generated content
         complete_cv_data = {
