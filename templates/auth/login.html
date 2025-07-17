@@ -10,7 +10,7 @@
             <p>Wprowadź swoje dane, aby uzyskać dostęp do konta</p>
         </div>
         
-        <form method="POST" class="auth-form">
+        <form method="POST" action="{{ url_for('login') }}" class="auth-form" novalidate>
             {{ form.hidden_tag() }}
             
             <div class="form-group">

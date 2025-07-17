@@ -526,7 +526,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Analyze job posting button
+    // Add this at the beginning of your main.js file if it's missing
+    // Initialize all elements - check if they exist first
+    const analyzeJobBtn = document.getElementById('analyze-job-btn');
+
+    // Only add event listeners if elements exist
     if (analyzeJobBtn) {
         analyzeJobBtn.addEventListener('click', async function() {
             const jobDescription = document.getElementById('job-description').value;
@@ -575,4 +579,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    // Close the analyzeJobBtn conditional block
+    });
 });
