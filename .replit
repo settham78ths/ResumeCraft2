@@ -10,6 +10,14 @@ run = ["sh", "-c", "python app.py"]
 [workflows]
 runButton = "Run CV Optimizer Pro"
 
+[[workflows.workflow]]
+name = "run"
+mode = "sequential"
+author = 45165629
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "ptyhnon app.py"
+
 [[ports]]
 localPort = 5003
-externalPort = 3003
