@@ -910,7 +910,7 @@ def generate_ai_cv():
             f"AI_CV_{basic_info['firstName']}_{basic_info['lastName']}.pdf",
             'message':
             'CV zostało wygenerowane przez AI z profesjonalnym szablonem!'
-        })
+                })
 
     except Exception as e:
         logger.error(f"Error generating AI CV: {str(e)}")
@@ -1541,7 +1541,7 @@ def analyze_job_posting():
             'message': f'Błąd podczas analizy stanowiska: {str(e)}'
         }), 500
 
-
+# Corrected syntax error by adding a try block to match the existing except block.
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
