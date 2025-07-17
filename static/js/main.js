@@ -526,8 +526,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Add this at the beginning of your main.js file if it's missing
-    // Initialize all elements - check if they exist first
+    // Initialize analyze job button - check if it exists first
     const analyzeJobBtn = document.getElementById('analyze-job-btn');
 
     // Only add event listeners if elements exist
@@ -579,7 +578,4 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-
-    // Close the analyzeJobBtn conditional block
-    });
 });
