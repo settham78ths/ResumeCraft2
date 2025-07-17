@@ -910,9 +910,9 @@ def generate_ai_cv():
             f"AI_CV_{basic_info['firstName']}_{basic_info['lastName']}.pdf",
             'message':
             'CV zostało wygenerowane przez AI z profesjonalnym szablonem!'
-                })
+        })
 
-    except Exception as e:
+        except Exception as e:
         logger.error(f"Error generating AI CV: {str(e)}")
         return jsonify({
             'success': False,
