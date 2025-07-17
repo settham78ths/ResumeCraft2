@@ -417,101 +417,205 @@ let currentStep = 1;
 let selectedTemplate = 'modern';
 
 function nextStep(step) {
+    console.log('nextStep called with step:', step);
+    
     // Validate current step
     if (!validateStep(currentStep)) {
+        console.log('Validation failed for step:', currentStep);
         return;
     }
 
-    // Hide current step
-    document.getElementById(`step${currentStep}`).style.display = 'none';
+    // Hide current step if it exists
+    const currentStepElement = document.getElementById('step' + currentStep);
+    if (currentStepElement && currentStep > 1) {
+        currentStepElement.style.display = 'none';
+    }
 
     // Show next step
-    if (step <= 4) {
-        if (step > 1) {
-            document.getElementById(`step${step}`).style.display = 'block';
+    if (step <= 4 && step > 1) {
+        const nextStepElement = document.getElementById('step' + step);
+        if (nextStepElement) {
+            nextStepElement.style.display = 'block';
+            currentStep = step;
+            updatePreview();
+            console.log('Moved to step:', step);
+        } else {
+            console.error('Step element not found:', 'step' + step);
         }
+    } else if (step === 1) {
+        // Special case for first step - just update current step
         currentStep = step;
-        updateStepIndicator();
+        updatePreview();
     }
 }
 
 function prevStep(step) {
-    // Hide current step
-    if (currentStep > 1) {
-        document.getElementById(`step${currentStep}`).style.display = 'none';
+    console.log('prevStep called with step:', step);
+    
+    // Hide current step if it exists
+    const currentStepElement = document.getElementById('step' + currentStep);
+    if (currentStepElement && currentStep > 1) {
+        currentStepElement.style.display = 'none';
     }
 
     // Show previous step
     if (step >= 1) {
         if (step > 1) {
-            document.getElementById(`step${step}`).style.display = 'block';
+            const prevStepElement = document.getElementById('step' + step);
+            if (prevStepElement) {
+                prevStepElement.style.display = 'block';
+                currentStep = step;
+                updatePreview();
+                console.log('Moved back to step:', step);
+            } else {
+                console.error('Step element not found:', 'step' + step);
+            }
+        } else {
+            // Step 1 is always visible
+            currentStep = step;
+            updatePreview();
         }
-        currentStep = step;
-        updateStepIndicator();
     }
 }
 
 function validateStep(step) {
+    console.log('Validating step:', step);
+    
     switch(step) {
         case 1:
-            const firstName = document.getElementById('firstName').value;
-            const lastName = document.getElementById('lastName').value;
-            const email = document.getElementById('email').value;
+            const firstName = document.getElementById('firstName');
+            const lastName = document.getElementById('lastName');
+            const email = document.getElementById('email');
 
             if (!firstName || !lastName || !email) {
-                alert('Proszę wypełnić wszystkie wymagane pola (Imię, Nazwisko, Email)');
+                console.error('Required form elements not found');
+                return false;
+            }
+
+            if (!firstName.value.trim() || !lastName.value.trim() || !email.value.trim()) {
+                showNotification('Proszę wypełnić wszystkie wymagane pola (Imię, Nazwisko, Email)', 'warning');
+                return false;
+            }
+            
+            // Basic email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email.value.trim())) {
+                showNotification('Proszę podać prawidłowy adres email', 'warning');
                 return false;
             }
             break;
+            
         case 2:
-            const targetPosition = document.getElementById('targetPosition').value;
+            const targetPosition = document.getElementById('targetPosition');
             if (!targetPosition) {
-                alert('Proszę podać docelowe stanowisko');
+                console.error('Target position element not found');
+                return false;
+            }
+            
+            if (!targetPosition.value.trim()) {
+                showNotification('Proszę podać docelowe stanowisko', 'warning');
+                return false;
+            }
+            break;
+            
+        case 3:
+            // Step 3 validation - optional for now
+            console.log('Step 3 validation passed');
+            break;
+            
+        case 4:
+            // Final step validation
+            if (!selectedTemplate) {
+                showNotification('Proszę wybrać szablon CV', 'warning');
                 return false;
             }
             break;
     }
+    
+    console.log('Validation passed for step:', step);
     return true;
 }
 
-function updateStepIndicator() {
-    // This function would update step indicators if we had them
-    // For now, just update the preview
-    updatePreview();
-}
-
 function updatePreview() {
-    const firstName = document.getElementById('firstName').value;
-    const lastName = document.getElementById('lastName').value;
-    const targetPosition = document.getElementById('targetPosition').value;
+    const firstName = document.getElementById('firstName');
+    const lastName = document.getElementById('lastName');
+    const targetPosition = document.getElementById('targetPosition');
+    const email = document.getElementById('email');
+    const phone = document.getElementById('phone');
+    const city = document.getElementById('city');
 
-    if (firstName && lastName) {
-        const preview = `
-            <div class="cv-preview">
-                <h4>${firstName} ${lastName}</h4>
-                ${targetPosition ? `<p class="text-muted">${targetPosition}</p>` : ''}
-                <p class="small text-muted">Podgląd zostanie zaktualizowany po wypełnieniu formularza</p>
+    if (firstName && lastName && firstName.value && lastName.value) {
+        let preview = `
+            <div class="cv-preview p-3">
+                <h4 class="mb-2">${firstName.value} ${lastName.value}</h4>
+                ${targetPosition && targetPosition.value ? `<p class="text-primary mb-1"><i class="fas fa-briefcase me-2"></i>${targetPosition.value}</p>` : ''}
+                ${email && email.value ? `<p class="text-muted mb-1"><i class="fas fa-envelope me-2"></i>${email.value}</p>` : ''}
+                ${phone && phone.value ? `<p class="text-muted mb-1"><i class="fas fa-phone me-2"></i>${phone.value}</p>` : ''}
+                ${city && city.value ? `<p class="text-muted mb-1"><i class="fas fa-map-marker-alt me-2"></i>${city.value}</p>` : ''}
+                <hr class="my-3">
+                <p class="small text-muted">
+                    <i class="fas fa-magic me-2"></i>Podgląd zostanie zaktualizowany po wypełnieniu wszystkich kroków
+                </p>
             </div>
         `;
-        document.getElementById('cv-preview-container').innerHTML = preview;
+        
+        const previewContainer = document.getElementById('cv-preview-container');
+        if (previewContainer) {
+            previewContainer.innerHTML = preview;
+        }
     }
+}
+
+function showNotification(message, type = 'info') {
+    // Remove existing notifications
+    const existingNotifications = document.querySelectorAll('.notification-alert');
+    existingNotifications.forEach(n => n.remove());
+    
+    // Create notification
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'warning' ? 'warning' : type} alert-dismissible fade show notification-alert position-fixed`;
+    notification.style.top = '20px';
+    notification.style.right = '20px';
+    notification.style.zIndex = '9999';
+    notification.style.minWidth = '300px';
+    
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'warning' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
+        ${message}
+        <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 5000);
 }
 
 // Template selection
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, initializing...');
+    
     const templateOptions = document.querySelectorAll('.template-option');
+    console.log('Found template options:', templateOptions.length);
 
-    templateOptions.forEach(option => {
+    templateOptions.forEach((option, index) => {
         option.addEventListener('click', function() {
             templateOptions.forEach(opt => opt.classList.remove('selected'));
             this.classList.add('selected');
             selectedTemplate = this.dataset.template;
+            console.log('Selected template:', selectedTemplate);
         });
     });
 
     // Select first template by default
     if (templateOptions.length > 0) {
         templateOptions[0].classList.add('selected');
+        selectedTemplate = templateOptions[0].dataset.template;
+        console.log('Default template selected:', selectedTemplate);
     }
 
     // Add input listeners for live preview
@@ -520,71 +624,156 @@ document.addEventListener('DOMContentLoaded', function() {
         const element = document.getElementById(id);
         if (element) {
             element.addEventListener('input', updatePreview);
+            console.log('Added listener to:', id);
+        } else {
+            console.warn('Element not found:', id);
         }
     });
+    
+    // Initial preview update
+    updatePreview();
 });
 
 function generateCV() {
-    if (!validateStep(currentStep)) {
+    console.log('generateCV called');
+    
+    if (!validateStep(4)) {
         return;
     }
 
     // Show loading
-    document.getElementById('generation-progress').style.display = 'block';
-    document.getElementById('generateBtn').disabled = true;
+    const progressElement = document.getElementById('generation-progress');
+    const generateBtn = document.getElementById('generateBtn');
+    
+    if (progressElement) {
+        progressElement.style.display = 'block';
+    }
+    if (generateBtn) {
+        generateBtn.disabled = true;
+        generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Generowanie...';
+    }
 
     // Collect form data
     const formData = {
-        firstName: document.getElementById('firstName').value,
-        lastName: document.getElementById('lastName').value,
-        email: document.getElementById('email').value,
-        phone: document.getElementById('phone').value,
-        city: document.getElementById('city').value,
-        targetPosition: document.getElementById('targetPosition').value,
-        experience: document.getElementById('experience').value,
-        skills: document.getElementById('skills').value,
-        education: document.getElementById('education').value,
-        languages: document.getElementById('languages').value,
-        additionalInfo: document.getElementById('additionalInfo').value,
+        firstName: document.getElementById('firstName')?.value || '',
+        lastName: document.getElementById('lastName')?.value || '',
+        email: document.getElementById('email')?.value || '',
+        phone: document.getElementById('phone')?.value || '',
+        city: document.getElementById('city')?.value || '',
+        targetPosition: document.getElementById('targetPosition')?.value || '',
+        experience: document.getElementById('experience')?.value || '',
+        skills: document.getElementById('skills')?.value || '',
+        education: document.getElementById('education')?.value || '',
+        languages: document.getElementById('languages')?.value || '',
+        additionalInfo: document.getElementById('additionalInfo')?.value || '',
         template: selectedTemplate
     };
+    
+    console.log('Sending form data:', formData);
 
     // Send to backend
-    fetch('/generate-ai-cv', {
+    fetch('/api/generate-ai-cv', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData)
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log('Response received:', response.status);
+        return response.json();
+    })
     .then(data => {
+        console.log('Response data:', data);
+        
         // Hide loading
-        document.getElementById('generation-progress').style.display = 'none';
-        document.getElementById('generateBtn').disabled = false;
+        if (progressElement) {
+            progressElement.style.display = 'none';
+        }
+        if (generateBtn) {
+            generateBtn.disabled = false;
+            generateBtn.innerHTML = '<i class="fas fa-robot me-2"></i>Generuj CV z AI';
+        }
 
         if (data.success) {
             // Show generated CV
-            document.getElementById('generated-cv-content').innerHTML = data.cv_html;
-            document.getElementById('generated-cv-section').style.display = 'block';
-
-            // Scroll to results
-            document.getElementById('generated-cv-section').scrollIntoView({ behavior: 'smooth' });
+            const contentElement = document.getElementById('generated-cv-content');
+            const sectionElement = document.getElementById('generated-cv-section');
+            
+            if (contentElement && data.cv_html) {
+                contentElement.innerHTML = data.cv_html;
+            }
+            if (sectionElement) {
+                sectionElement.style.display = 'block';
+                // Scroll to results
+                sectionElement.scrollIntoView({ behavior: 'smooth' });
+            }
+            
+            showNotification('CV zostało wygenerowane pomyślnie!', 'success');
         } else {
-            alert('Wystąpił błąd podczas generowania CV: ' + (data.error || 'Nieznany błąd'));
+            if (data.premium_required) {
+                showPaymentModal();
+            } else {
+                showNotification('Wystąpił błąd podczas generowania CV: ' + (data.message || 'Nieznany błąd'), 'error');
+            }
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        document.getElementById('generation-progress').style.display = 'none';
-        document.getElementById('generateBtn').disabled = false;
-        alert('Wystąpił błąd podczas generowania CV');
+        
+        // Hide loading
+        if (progressElement) {
+            progressElement.style.display = 'none';
+        }
+        if (generateBtn) {
+            generateBtn.disabled = false;
+            generateBtn.innerHTML = '<i class="fas fa-robot me-2"></i>Generuj CV z AI';
+        }
+        
+        showNotification('Wystąpił błąd podczas generowania CV. Spróbuj ponownie.', 'error');
     });
 }
 
+function showPaymentModal() {
+    const modalHtml = `
+        <div class="modal fade" id="paymentModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="fas fa-crown me-2"></i>Funkcja Premium</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <i class="fas fa-robot fa-3x text-primary mb-3"></i>
+                        <h4>AI Generator CV</h4>
+                        <p>Automatyczne generowanie CV za pomocą sztucznej inteligencji jest dostępne tylko dla użytkowników Premium.</p>
+                        <div class="pricing-info mb-3">
+                            <span class="h3 text-primary">14,99 PLN</span>
+                            <span class="text-muted">/jednorazowo</span>
+                        </div>
+                        <button class="btn btn-premium btn-lg" onclick="window.location.href='/checkout'">
+                            <i class="fas fa-credit-card me-2"></i>Aktywuj Premium
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Remove existing modal
+    const existingModal = document.getElementById('paymentModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    const modal = new bootstrap.Modal(document.getElementById('paymentModal'));
+    modal.show();
+}
+
 function downloadPDF() {
-    // This would implement PDF download functionality
-    alert('Funkcja pobierania PDF zostanie wkrótce dodana');
+    showNotification('Funkcja pobierania PDF zostanie wkrótce dodana', 'info');
 }
 
 // Add download button listener
