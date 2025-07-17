@@ -1,62 +1,59 @@
 
+import time
 from functools import wraps
 from flask import request, jsonify
-import time
-from collections import defaultdict, deque
+from typing import Dict, Tuple
 
 class RateLimiter:
     def __init__(self):
-        self.requests = defaultdict(deque)
+        self.requests = {}  # IP -> {action: [(timestamp, count), ...]}
         self.limits = {
-            'cv_upload': (5, 300),  # 5 uploads per 5 minutes
-            'cv_process': (10, 3600),  # 10 processes per hour
-            'ai_analysis': (20, 3600),  # 20 AI calls per hour
-            'general': (100, 3600)  # 100 general requests per hour
+            'cv_upload': (5, 300),  # 5 requests per 5 minutes
+            'cv_process': (10, 300),  # 10 requests per 5 minutes
+            'default': (20, 300)  # 20 requests per 5 minutes
         }
     
-    def is_allowed(self, identifier, limit_type='general'):
-        now = time.time()
-        max_requests, time_window = self.limits.get(limit_type, (100, 3600))
+    def is_allowed(self, ip: str, action: str = 'default') -> Tuple[bool, int]:
+        """Check if request is allowed"""
+        current_time = time.time()
+        limit, window = self.limits.get(action, self.limits['default'])
+        
+        if ip not in self.requests:
+            self.requests[ip] = {}
+        
+        if action not in self.requests[ip]:
+            self.requests[ip][action] = []
         
         # Clean old requests
-        user_requests = self.requests[identifier]
-        while user_requests and user_requests[0] < now - time_window:
-            user_requests.popleft()
+        self.requests[ip][action] = [
+            (timestamp, count) for timestamp, count in self.requests[ip][action]
+            if current_time - timestamp < window
+        ]
         
-        # Check if limit exceeded
-        if len(user_requests) >= max_requests:
-            return False
+        # Count current requests
+        total_requests = sum(count for _, count in self.requests[ip][action])
+        
+        if total_requests >= limit:
+            return False, window
         
         # Add current request
-        user_requests.append(now)
-        return True
-    
-    def get_reset_time(self, identifier, limit_type='general'):
-        now = time.time()
-        _, time_window = self.limits.get(limit_type, (100, 3600))
-        user_requests = self.requests[identifier]
-        
-        if user_requests:
-            return int(user_requests[0] + time_window - now)
-        return 0
+        self.requests[ip][action].append((current_time, 1))
+        return True, 0
 
 rate_limiter = RateLimiter()
 
-def rate_limit(limit_type='general'):
+def rate_limit(action: str = 'default'):
+    """Rate limiting decorator"""
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            # Use IP address or user ID as identifier
-            identifier = request.remote_addr
-            if hasattr(request, 'current_user') and request.current_user.is_authenticated:
-                identifier = f"user_{request.current_user.id}"
+            ip = request.remote_addr
+            allowed, retry_after = rate_limiter.is_allowed(ip, action)
             
-            if not rate_limiter.is_allowed(identifier, limit_type):
-                reset_time = rate_limiter.get_reset_time(identifier, limit_type)
+            if not allowed:
                 return jsonify({
-                    'success': False,
-                    'message': f'Rate limit exceeded. Try again in {reset_time} seconds.',
-                    'retry_after': reset_time
+                    'error': 'Rate limit exceeded',
+                    'retry_after': retry_after
                 }), 429
             
             return f(*args, **kwargs)

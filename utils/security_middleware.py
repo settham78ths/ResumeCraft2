@@ -1,91 +1,58 @@
-
-from flask import request, g
+from flask import request, jsonify
 import logging
-from datetime import datetime
-import json
+
+logger = logging.getLogger(__name__)
 
 class SecurityMiddleware:
-    def __init__(self, app=None):
-        self.app = app
+    def __init__(self):
+        self.blocked_ips = set()
         self.suspicious_patterns = [
-            'script', 'javascript:', 'eval(', 'function(',
-            'SELECT', 'INSERT', 'DELETE', 'UPDATE', 'DROP',
-            '../', '..\\', '/etc/passwd', 'cmd.exe'
+            'script',
+            'javascript:',
+            '<script',
+            'eval(',
+            'document.cookie'
         ]
-        
-        if app:
-            self.init_app(app)
-    
+
     def init_app(self, app):
-        app.before_request(self.before_request)
-        app.after_request(self.after_request)
-    
-    def before_request(self):
-        """Security checks before processing request"""
-        # Log suspicious activity
-        self._check_suspicious_patterns()
-        
-        # Store request start time
-        g.start_time = datetime.utcnow()
-        
-        # Check for common attack patterns
-        self._check_security_headers()
-    
-    def after_request(self, response):
-        """Security processing after request"""
-        # Add security headers
-        response.headers['X-Content-Type-Options'] = 'nosniff'
-        response.headers['X-Frame-Options'] = 'DENY'
-        response.headers['X-XSS-Protection'] = '1; mode=block'
-        response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
-        
-        # Log response time
-        if hasattr(g, 'start_time'):
-            duration = (datetime.utcnow() - g.start_time).total_seconds()
-            if duration > 10:  # Log slow requests
-                logging.warning(f"Slow request: {request.endpoint} took {duration:.2f}s")
-        
-        return response
-    
-    def _check_suspicious_patterns(self):
-        """Check for suspicious patterns in request data"""
-        request_data = {}
-        
-        # Check URL parameters
-        if request.args:
-            request_data.update(request.args)
-        
+        """Initialize security middleware with Flask app"""
+        @app.before_request
+        def security_check():
+            return self.check_request()
+
+    def check_request(self):
+        """Check incoming request for security issues"""
+        ip = request.remote_addr
+
+        # Check blocked IPs
+        if ip in self.blocked_ips:
+            logger.warning(f"Blocked IP attempted access: {ip}")
+            return jsonify({'error': 'Access denied'}), 403
+
+        # Check for suspicious patterns in request data
+        if request.is_json:
+            data = request.get_json(silent=True)
+            if data and self._contains_suspicious_content(str(data)):
+                logger.warning(f"Suspicious content detected from {ip}")
+                return jsonify({'error': 'Invalid request'}), 400
+
         # Check form data
         if request.form:
-            request_data.update(request.form)
-        
-        # Check JSON data
-        if request.is_json:
-            try:
-                json_data = request.get_json()
-                if json_data:
-                    request_data.update(json_data)
-            except:
-                pass
-        
-        # Check for suspicious patterns
-        for key, value in request_data.items():
-            if isinstance(value, str):
-                for pattern in self.suspicious_patterns:
-                    if pattern.lower() in value.lower():
-                        logging.warning(f"Suspicious pattern '{pattern}' detected in {key}: {value[:100]}")
-    
-    def _check_security_headers(self):
-        """Check for security headers"""
-        user_agent = request.headers.get('User-Agent', '')
-        
-        # Log unusual user agents
-        if not user_agent or len(user_agent) < 10:
-            logging.warning(f"Suspicious User-Agent: {user_agent}")
-        
-        # Check for automated tools
-        automated_tools = ['curl', 'wget', 'python-requests', 'bot', 'crawler']
-        if any(tool in user_agent.lower() for tool in automated_tools):
-            logging.info(f"Automated tool detected: {user_agent}")
+            for value in request.form.values():
+                if self._contains_suspicious_content(value):
+                    logger.warning(f"Suspicious form data from {ip}")
+                    return jsonify({'error': 'Invalid request'}), 400
+
+        return None
+
+    def _contains_suspicious_content(self, content: str) -> bool:
+        """Check if content contains suspicious patterns"""
+        content_lower = content.lower()
+        return any(pattern in content_lower for pattern in self.suspicious_patterns)
+
+    def block_ip(self, ip: str):
+        """Block IP address"""
+        self.blocked_ips.add(ip)
+        logger.info(f"IP blocked: {ip}")
 
 security_middleware = SecurityMiddleware()

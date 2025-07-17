@@ -1,41 +1,39 @@
 
-from cryptography.fernet import Fernet
 import os
 import base64
-from werkzeug.security import generate_password_hash
-import secrets
+from cryptography.fernet import Fernet
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
-class DataEncryption:
+class Encryption:
     def __init__(self):
-        # Generate or load encryption key
-        key = os.environ.get('ENCRYPTION_KEY')
-        if not key:
-            # Generate new key if not exists
-            key = Fernet.generate_key()
-            print(f"⚠️  Generated new encryption key: {key.decode()}")
-            print("⚠️  Add this to your .env file: ENCRYPTION_KEY={key.decode()}")
-        else:
-            key = key.encode()
+        self.key = self._get_or_create_key()
+        self.cipher = Fernet(self.key)
+    
+    def _get_or_create_key(self):
+        """Get or create encryption key"""
+        key_env = os.environ.get('ENCRYPTION_KEY')
+        if key_env:
+            return key_env.encode()
         
-        self.cipher = Fernet(key)
+        # Generate key from session secret
+        password = os.environ.get('SESSION_SECRET', 'default-secret').encode()
+        salt = b'cv_optimizer_salt'
+        kdf = PBKDF2HMAC(
+            algorithm=hashes.SHA256(),
+            length=32,
+            salt=salt,
+            iterations=100000,
+        )
+        key = base64.urlsafe_b64encode(kdf.derive(password))
+        return key
     
-    def encrypt_text(self, text):
-        """Encrypt sensitive text data"""
-        if not text:
-            return text
-        return self.cipher.encrypt(text.encode()).decode()
+    def encrypt(self, data: str) -> str:
+        """Encrypt string data"""
+        return self.cipher.encrypt(data.encode()).decode()
     
-    def decrypt_text(self, encrypted_text):
-        """Decrypt sensitive text data"""
-        if not encrypted_text:
-            return encrypted_text
-        try:
-            return self.cipher.decrypt(encrypted_text.encode()).decode()
-        except Exception:
-            return encrypted_text  # Return original if decryption fails
-    
-    def generate_secure_token(self, length=32):
-        """Generate secure random token"""
-        return secrets.token_urlsafe(length)
+    def decrypt(self, encrypted_data: str) -> str:
+        """Decrypt string data"""
+        return self.cipher.decrypt(encrypted_data.encode()).decode()
 
-encryption = DataEncryption()
+encryption = Encryption()

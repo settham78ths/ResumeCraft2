@@ -1,51 +1,29 @@
-
-from flask import session
+import logging
+from typing import List, Dict, Any
 from datetime import datetime
-import json
+
+logger = logging.getLogger(__name__)
 
 class NotificationSystem:
     def __init__(self):
-        self.notification_types = {
-            'success': '✅',
-            'warning': '⚠️',
-            'error': '❌',
-            'info': 'ℹ️',
-            'premium': '💎'
-        }
-    
-    def add_notification(self, message, type='info', persistent=False):
-        """Add notification to user session"""
-        if 'notifications' not in session:
-            session['notifications'] = []
-        
+        self.notifications = []
+
+    def add_notification(self, message: str, type: str = 'info'):
+        """Add notification to the system"""
         notification = {
-            'id': len(session['notifications']),
             'message': message,
-            'type': type,
-            'icon': self.notification_types.get(type, 'ℹ️'),
-            'timestamp': datetime.now().isoformat(),
-            'persistent': persistent
+            'type': type,  # info, warning, error, success
+            'timestamp': datetime.utcnow().isoformat()
         }
-        
-        session['notifications'].append(notification)
-        session.modified = True
-    
-    def get_notifications(self, clear_non_persistent=True):
-        """Get all notifications and optionally clear non-persistent ones"""
-        notifications = session.get('notifications', [])
-        
-        if clear_non_persistent:
-            # Keep only persistent notifications
-            persistent_notifications = [n for n in notifications if n.get('persistent', False)]
-            session['notifications'] = persistent_notifications
-            session.modified = True
-        
-        return notifications
-    
-    def clear_notification(self, notification_id):
-        """Clear specific notification"""
-        notifications = session.get('notifications', [])
-        session['notifications'] = [n for n in notifications if n.get('id') != notification_id]
-        session.modified = True
+        self.notifications.append(notification)
+        logger.info(f"Notification added: {message}")
+
+    def get_notifications(self) -> List[Dict[str, Any]]:
+        """Get all notifications"""
+        return self.notifications
+
+    def clear_notifications(self):
+        """Clear all notifications"""
+        self.notifications.clear()
 
 notification_system = NotificationSystem()
