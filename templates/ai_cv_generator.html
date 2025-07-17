@@ -259,6 +259,24 @@
                                 </div>
                             </div>
                         </div>
+                         <div class="col-md-6 mb-3">
+                            <div class="template-option" data-template="creative">
+                                <div class="template-preview">
+                                    <i class="fas fa-palette"></i>
+                                    <h6>Kreatywny</h6>
+                                    <p class="small">Unikalny i artystyczny wygląd</p>
+                                </div>
+                            </div>
+                        </div>
+                         <div class="col-md-6 mb-3">
+                            <div class="template-option" data-template="executive">
+                                <div class="template-preview">
+                                    <i class="fas fa-award"></i>
+                                    <h6>Menedżerski</h6>
+                                    <p class="small">Ekskluzywny styl dla kadry zarządzającej</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -408,6 +426,20 @@
     background: #4ade80;
     color: white;
 }
+/* Premium button style */
+.btn-premium {
+    background: linear-gradient(to right, #ff9900, #ff6600);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.btn-premium:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+    color: white;
+}
 </style>
 {% endblock %}
 
@@ -418,7 +450,7 @@ let selectedTemplate = 'modern';
 
 function nextStep(step) {
     console.log('nextStep called with step:', step);
-    
+
     // Validate current step
     if (!validateStep(currentStep)) {
         console.log('Validation failed for step:', currentStep);
@@ -451,7 +483,7 @@ function nextStep(step) {
 
 function prevStep(step) {
     console.log('prevStep called with step:', step);
-    
+
     // Hide current step if it exists
     const currentStepElement = document.getElementById('step' + currentStep);
     if (currentStepElement && currentStep > 1) {
@@ -480,7 +512,7 @@ function prevStep(step) {
 
 function validateStep(step) {
     console.log('Validating step:', step);
-    
+
     switch(step) {
         case 1:
             const firstName = document.getElementById('firstName');
@@ -496,7 +528,7 @@ function validateStep(step) {
                 showNotification('Proszę wypełnić wszystkie wymagane pola (Imię, Nazwisko, Email)', 'warning');
                 return false;
             }
-            
+
             // Basic email validation
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(email.value.trim())) {
@@ -504,25 +536,25 @@ function validateStep(step) {
                 return false;
             }
             break;
-            
+
         case 2:
             const targetPosition = document.getElementById('targetPosition');
             if (!targetPosition) {
                 console.error('Target position element not found');
                 return false;
             }
-            
+
             if (!targetPosition.value.trim()) {
                 showNotification('Proszę podać docelowe stanowisko', 'warning');
                 return false;
             }
             break;
-            
+
         case 3:
             // Step 3 validation - optional for now
             console.log('Step 3 validation passed');
             break;
-            
+
         case 4:
             // Final step validation
             if (!selectedTemplate) {
@@ -531,7 +563,7 @@ function validateStep(step) {
             }
             break;
     }
-    
+
     console.log('Validation passed for step:', step);
     return true;
 }
@@ -558,7 +590,7 @@ function updatePreview() {
                 </p>
             </div>
         `;
-        
+
         const previewContainer = document.getElementById('cv-preview-container');
         if (previewContainer) {
             previewContainer.innerHTML = preview;
@@ -570,7 +602,7 @@ function showNotification(message, type = 'info') {
     // Remove existing notifications
     const existingNotifications = document.querySelectorAll('.notification-alert');
     existingNotifications.forEach(n => n.remove());
-    
+
     // Create notification
     const notification = document.createElement('div');
     notification.className = `alert alert-${type === 'warning' ? 'warning' : type} alert-dismissible fade show notification-alert position-fixed`;
@@ -578,15 +610,15 @@ function showNotification(message, type = 'info') {
     notification.style.right = '20px';
     notification.style.zIndex = '9999';
     notification.style.minWidth = '300px';
-    
+
     notification.innerHTML = `
         <i class="fas fa-${type === 'warning' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
         ${message}
         <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
     `;
-    
+
     document.body.appendChild(notification);
-    
+
     // Auto-remove after 5 seconds
     setTimeout(() => {
         if (notification.parentNode) {
@@ -598,7 +630,7 @@ function showNotification(message, type = 'info') {
 // Template selection
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM loaded, initializing...');
-    
+
     const templateOptions = document.querySelectorAll('.template-option');
     console.log('Found template options:', templateOptions.length);
 
@@ -629,14 +661,14 @@ document.addEventListener('DOMContentLoaded', function() {
             console.warn('Element not found:', id);
         }
     });
-    
+
     // Initial preview update
     updatePreview();
 });
 
 function generateCV() {
     console.log('generateCV called');
-    
+
     if (!validateStep(4)) {
         return;
     }
@@ -644,7 +676,7 @@ function generateCV() {
     // Show loading
     const progressElement = document.getElementById('generation-progress');
     const generateBtn = document.getElementById('generateBtn');
-    
+
     if (progressElement) {
         progressElement.style.display = 'block';
     }
@@ -668,7 +700,7 @@ function generateCV() {
         additionalInfo: document.getElementById('additionalInfo')?.value || '',
         template: selectedTemplate
     };
-    
+
     console.log('Sending form data:', formData);
 
     // Send to backend
@@ -685,7 +717,7 @@ function generateCV() {
     })
     .then(data => {
         console.log('Response data:', data);
-        
+
         // Hide loading
         if (progressElement) {
             progressElement.style.display = 'none';
@@ -699,7 +731,7 @@ function generateCV() {
             // Show generated CV
             const contentElement = document.getElementById('generated-cv-content');
             const sectionElement = document.getElementById('generated-cv-section');
-            
+
             if (contentElement && data.cv_html) {
                 contentElement.innerHTML = data.cv_html;
             }
@@ -708,7 +740,7 @@ function generateCV() {
                 // Scroll to results
                 sectionElement.scrollIntoView({ behavior: 'smooth' });
             }
-            
+
             showNotification('CV zostało wygenerowane pomyślnie!', 'success');
         } else {
             if (data.premium_required) {
@@ -720,7 +752,7 @@ function generateCV() {
     })
     .catch(error => {
         console.error('Error:', error);
-        
+
         // Hide loading
         if (progressElement) {
             progressElement.style.display = 'none';
@@ -729,7 +761,7 @@ function generateCV() {
             generateBtn.disabled = false;
             generateBtn.innerHTML = '<i class="fas fa-robot me-2"></i>Generuj CV z AI';
         }
-        
+
         showNotification('Wystąpił błąd podczas generowania CV. Spróbuj ponownie.', 'error');
     });
 }
@@ -759,21 +791,37 @@ function showPaymentModal() {
             </div>
         </div>
     `;
-    
+
     // Remove existing modal
     const existingModal = document.getElementById('paymentModal');
     if (existingModal) {
         existingModal.remove();
     }
-    
+
     document.body.insertAdjacentHTML('beforeend', modalHtml);
-    
+
     const modal = new bootstrap.Modal(document.getElementById('paymentModal'));
     modal.show();
 }
 
 function downloadPDF() {
-    showNotification('Funkcja pobierania PDF zostanie wkrótce dodana', 'info');
+     // Check if the user has premium access
+    fetch('/api/check-premium')
+        .then(response => response.json())
+        .then(data => {
+            if (data.has_premium) {
+                // User has premium, proceed with download
+                // Implement PDF download logic here, e.g., trigger a download by setting window.location
+                window.location.href = '/api/download-cv';  // Backend endpoint for PDF download
+            } else {
+                // User does not have premium, show payment modal
+                showPaymentModal();
+            }
+        })
+        .catch(error => {
+            console.error('Error checking premium status:', error);
+            showNotification('Wystąpił błąd podczas sprawdzania statusu Premium. Spróbuj ponownie.', 'error');
+        });
 }
 
 // Add download button listener

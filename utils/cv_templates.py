@@ -481,6 +481,78 @@ class CVTemplateGenerator:
         buffer.seek(0)
         return buffer
 
+def generate_modern_green_cv(self, cv_data):
+        """Generate modern green CV template"""
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=2*cm, leftMargin=2*cm, 
+                               topMargin=2*cm, bottomMargin=2*cm)
+        story = []
+        
+        # Green accent header
+        story.append(ColorBox(doc.width, 0.5*cm, colors.HexColor('#27ae60')))
+        story.append(Spacer(1, 0.3*cm))
+        
+        # Similar structure to modern_blue but with green colors
+        green_title = ParagraphStyle(
+            'GreenTitle',
+            parent=self.modern_title,
+            textColor=colors.HexColor('#2c3e50')
+        )
+        
+        green_subtitle = ParagraphStyle(
+            'GreenSubtitle',
+            parent=self.modern_subtitle,
+            textColor=colors.HexColor('#27ae60')
+        )
+        
+        name = f"{cv_data.get('firstName', '')} {cv_data.get('lastName', '')}".strip()
+        story.append(Paragraph(name, green_title))
+        
+        job_title = cv_data.get('jobTitle', '')
+        if job_title:
+            story.append(Paragraph(job_title, green_subtitle))
+        
+        # Rest similar to modern_blue with green accents
+        doc.build(story)
+        buffer.seek(0)
+        return buffer
+    
+    def generate_tech_style_cv(self, cv_data):
+        """Generate tech-style CV template"""
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=2*cm, leftMargin=2*cm, 
+                               topMargin=2*cm, bottomMargin=2*cm)
+        story = []
+        
+        # Tech purple header
+        story.append(ColorBox(doc.width, 0.5*cm, colors.HexColor('#8e44ad')))
+        story.append(Spacer(1, 0.3*cm))
+        
+        tech_title = ParagraphStyle(
+            'TechTitle',
+            parent=self.modern_title,
+            textColor=colors.HexColor('#2c3e50'),
+            fontName='Courier-Bold'
+        )
+        
+        tech_subtitle = ParagraphStyle(
+            'TechSubtitle',
+            parent=self.modern_subtitle,
+            textColor=colors.HexColor('#8e44ad'),
+            fontName='Courier'
+        )
+        
+        name = f"{cv_data.get('firstName', '')} {cv_data.get('lastName', '')}".strip()
+        story.append(Paragraph(name, tech_title))
+        
+        job_title = cv_data.get('jobTitle', '')
+        if job_title:
+            story.append(Paragraph(job_title, tech_subtitle))
+        
+        doc.build(story)
+        buffer.seek(0)
+        return buffer
+
 def generate_cv_with_template(cv_data, template_style="modern_blue"):
     """Main function to generate CV with selected template"""
     generator = CVTemplateGenerator()
@@ -493,6 +565,10 @@ def generate_cv_with_template(cv_data, template_style="modern_blue"):
         return generator.generate_executive_cv(cv_data)
     elif template_style == "minimalist":
         return generator.generate_minimalist_cv(cv_data)
+    elif template_style == "modern_green":
+        return generator.generate_modern_green_cv(cv_data)
+    elif template_style == "tech_style":
+        return generator.generate_tech_style_cv(cv_data)
     else:
         # Default to modern blue
         return generator.generate_modern_blue_cv(cv_data)

@@ -955,6 +955,86 @@ def create_ai_cv_payment():
         }), 500
 
 
+@app.route('/api/create-pdf-payment', methods=['POST'])
+@login_required
+def create_pdf_payment():
+    """Create payment for PDF download (14.99 PLN)"""
+    try:
+        data = request.get_json()
+        
+        # Store PDF data for after payment
+        session['pending_pdf_data'] = data.get('pdf_data')
+        session['pending_pdf_filename'] = data.get('filename')
+
+        # Create Stripe checkout session for PDF download
+        stripe_session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+                'price_data': {
+                    'currency': 'pln',
+                    'product_data': {
+                        'name': 'CV w formacie PDF',
+                        'description': 'Pobieranie wygenerowanego CV w wysokiej jakości PDF',
+                    },
+                    'unit_amount': 1499,  # 14.99 PLN
+                },
+                'quantity': 1,
+            }],
+            mode='payment',
+            success_url=url_for('pdf_download_success', _external=True),
+            cancel_url=url_for('ai_cv_generator', _external=True),
+            customer_email=current_user.email,
+            metadata={
+                'user_id': current_user.id,
+                'service': 'pdf_download'
+            })
+
+        return jsonify({
+            'success': True,
+            'checkout_url': stripe_session.url
+        })
+
+    except Exception as e:
+        logger.error(f"Error creating PDF payment: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': f"Błąd podczas tworzenia płatności: {str(e)}"
+        }), 500
+
+
+@app.route('/pdf-download-success')
+@login_required
+def pdf_download_success():
+    """Handle successful PDF payment and provide download"""
+    try:
+        pdf_data = session.get('pending_pdf_data')
+        filename = session.get('pending_pdf_filename', 'CV.pdf')
+        
+        if not pdf_data:
+            flash('Brak danych PDF do pobrania', 'error')
+            return redirect(url_for('ai_cv_generator'))
+        
+        # Clear session data
+        session.pop('pending_pdf_data', None)
+        session.pop('pending_pdf_filename', None)
+        
+        # Return PDF as download
+        from flask import make_response
+        import base64
+        
+        pdf_bytes = base64.b64decode(pdf_data)
+        response = make_response(pdf_bytes)
+        response.headers['Content-Type'] = 'application/pdf'
+        response.headers['Content-Disposition'] = f'attachment; filename="{filename}"'
+        
+        return response
+        
+    except Exception as e:
+        logger.error(f"Error in PDF download success: {str(e)}")
+        flash('Wystąpił błąd podczas pobierania PDF', 'error')
+        return redirect(url_for('ai_cv_generator'))
+
+
 def generate_cv_pdf_file(cv_data):
     """Generate PDF file from CV data"""
     buffer = io.BytesIO()
