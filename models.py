@@ -52,6 +52,17 @@ class User(UserMixin, db.Model):
             return False
         return True
     
+    def get_full_name(self):
+        """Get user's full name (first_name + last_name)"""
+        if self.first_name and self.last_name:
+            return f"{self.first_name} {self.last_name}".strip()
+        elif self.first_name:
+            return self.first_name
+        elif self.last_name:
+            return self.last_name
+        else:
+            return None
+    
     def __repr__(self):
         return f'<User {self.username}>'
 
