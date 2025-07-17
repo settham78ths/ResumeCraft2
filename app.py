@@ -1494,6 +1494,16 @@ def apply_recruiter_feedback():
         }), 500
 
 
+@app.route('/api/check-premium', methods=['GET'])
+@login_required
+def check_premium():
+    """Check if user has Premium access"""
+    return jsonify({
+        'success': True,
+        'is_premium': current_user.is_premium_active(),
+        'is_developer': current_user.username == 'developer'
+    })
+
 @app.route('/analyze-job-posting', methods=['POST'])
 def analyze_job_posting():
     """
@@ -1574,5 +1584,6 @@ if __name__ == '__main__':
         else:
             print("✅ Developer account already exists")
 
-    port = int(os.environ.get('PORT', 5003))
-    app.run(host='0.0.0.0', port=port, debug=True)
+    # Use port 5000 for Replit deployment
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)

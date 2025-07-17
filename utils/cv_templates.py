@@ -516,7 +516,7 @@ class CVTemplateGenerator:
         doc.build(story)
         buffer.seek(0)
         return buffer
-    
+
     def generate_tech_style_cv(self, cv_data):
         """Generate tech-style CV template"""
         buffer = io.BytesIO()
