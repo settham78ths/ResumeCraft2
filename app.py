@@ -1287,93 +1287,93 @@ def process_cv():
                                             payment_verified=True)
                     result = parse_ai_json_response(ai_result)
 
-        elif selected_option == 'ats_optimization_check':
+            elif selected_option == 'ats_optimization_check':
             # Funkcja za 9,99 PLN lub Premium
-            result = options_handlers[selected_option](cv_text,
-                                                       job_description,
-                                                       language)
+                result = options_handlers[selected_option](cv_text,
+                                                           job_description,
+                                                           language)
 
-        elif selected_option == 'position_optimization':
+            elif selected_option == 'position_optimization':
             # Funkcja tylko Premium
-            job_title = data.get('job_title', 'Specjalista')
-            ai_result = optimize_for_position(cv_text, job_title,
-                                              job_description, language)
-            result = parse_ai_json_response(ai_result)
+                job_title = data.get('job_title', 'Specjalista')
+                ai_result = optimize_for_position(cv_text, job_title,
+                                                  job_description, language)
+                result = parse_ai_json_response(ai_result)
 
-        elif selected_option == 'advanced_position_optimization':
+            elif selected_option == 'advanced_position_optimization':
             # NOWA ZAAWANSOWANA FUNKCJA - tylko Premium
-            from utils.openrouter_api import optimize_cv_for_specific_position
+                from utils.openrouter_api import optimize_cv_for_specific_position
 
-            job_title = data.get('job_title', 'Specjalista')
-            company_name = data.get('company_name', '')
+                job_title = data.get('job_title', 'Specjalista')
+                company_name = data.get('company_name', '')
 
-            ai_result = optimize_cv_for_specific_position(
-                cv_text,
-                job_title,
-                job_description,
-                company_name,
-                language,
-                is_premium=is_premium_active,
-                payment_verified=payment_verified)
-            result = parse_ai_json_response(ai_result)
+                ai_result = optimize_cv_for_specific_position(
+                    cv_text,
+                    job_title,
+                    job_description,
+                    company_name,
+                    language,
+                    is_premium=is_premium_active,
+                    payment_verified=payment_verified)
+                result = parse_ai_json_response(ai_result)
 
-        elif selected_option in [
-                'cover_letter', 'interview_tips', 'recruiter_feedback'
-        ]:
+            elif selected_option in [
+                    'cover_letter', 'interview_tips', 'recruiter_feedback'
+            ]:
             # Funkcje tylko Premium
-            if selected_option == 'cover_letter':
-                result = options_handlers[selected_option](cv_text,
-                                                           job_description,
-                                                           language)
-            else:
-                result = options_handlers[selected_option](cv_text,
-                                                           job_description,
-                                                           language)
+                if selected_option == 'cover_letter':
+                    result = options_handlers[selected_option](cv_text,
+                                                               job_description,
+                                                               language)
+                else:
+                    result = options_handlers[selected_option](cv_text,
+                                                               job_description,
+                                                               language)
 
-        else:
-            # Pozostałe funkcje
-            result = options_handlers[selected_option](cv_text,
-                                                       job_description,
-                                                       language)
+            else:
+                # Pozostałe funkcje
+                result = options_handlers[selected_option](cv_text,
+                                                           job_description,
+                                                           language)
 
         # Store optimized CV for comparison (only for optimization options)
-        if selected_option in ['optimize', 'position_optimization']:
-            session['last_optimized_cv'] = result
+            if selected_option in ['optimize', 'position_optimization']:
+                session['last_optimized_cv'] = result
 
             # Zapisz wynik analizy w bazie danych
-        cv_upload_id = session.get('cv_upload_id')
-        if cv_upload_id:
-            try:
-                analysis_result = AnalysisResult(
-                    cv_upload_id=cv_upload_id,
-                    analysis_type=selected_option,
-                    result_data=json.dumps(
-                        {
-                            'result':
-                            result,
-                            'job_description':
-                            extracted_job_description
-                            if extracted_job_description else job_description,
-                            'job_url':
-                            job_url,
-                            'timestamp':
-                            datetime.utcnow().isoformat()
-                        },
-                        ensure_ascii=False))
-                db.session.add(analysis_result)
-                db.session.commit()
-            except Exception as e:
-                logger.error(f"Error saving analysis result: {str(e)}")
-                # Nie blokujemy odpowiedzi, tylko logujemy błąd
+            cv_upload_id = session.get('cv_upload_id')
+            if cv_upload_id:
+                try:
+                    analysis_result = AnalysisResult(
+                        cv_upload_id=cv_upload_id,
+                        analysis_type=selected_option,
+                        result_data=json.dumps(
+                            {
+                                'result':
+                                result,
+                                'job_description':
+                                extracted_job_description
+                                if extracted_job_description else job_description,
+                                'job_url':
+                                job_url,
+                                'timestamp':
+                                datetime.utcnow().isoformat()
+                            },
+                            ensure_ascii=False))
+                    db.session.add(analysis_result)
+                    db.session.commit()
+                except Exception as e:
+                    logger.error(f"Error saving analysis result: {str(e)}")
+                    # Nie blokujemy odpowiedzi, tylko logujemy błąd
 
-        return jsonify({
-            'success':
-            True,
-            'result':
-            result,
-            'job_description':
-            extracted_job_description if extracted_job_description else None
-        })
+            return jsonify({
+                'success':
+                True,
+                'result':
+                result,
+                'job_description':
+                extracted_job_description if extracted_job_description else None
+            })
 
     except Exception as e:
         logger.error(f"Error processing CV: {str(e)}")
