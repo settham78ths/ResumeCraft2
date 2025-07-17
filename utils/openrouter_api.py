@@ -677,16 +677,28 @@ def optimize_cv(cv_text, job_description, language='pl', is_premium=False, payme
     Premium users get extended token limits for more detailed CV generation
     """
     prompt = f"""
-    ZADANIE: Automatycznie rozpoznaj branżę/sektor na podstawie CV, a następnie zoptymalizuj je pod kątem tej branży i stanowiska, używając WYŁĄCZNIE prawdziwych informacji z oryginalnego CV.
+    ZADANIE: ZAAWANSOWANA OPTYMALIZACJA CV - Przeanalizuj głęboko doświadczenie zawodowe i przepisz je inteligentnie pod kątem konkretnego stanowiska, używając WYŁĄCZNIE prawdziwych informacji z oryginalnego CV.
 
     ABSOLUTNE ZASADY - PRZECZYTAJ UWAŻNIE:
     1. ❌ ZAKAZ WYMYŚLANIA: NIE dodawaj żadnych nowych informacji, firm, stanowisk, dat, liczb, procent, osiągnięć
     2. ❌ ZAKAZ DODAWANIA: NIE twórz nowych umiejętności, certyfikatów, projektów czy doświadczeń
     3. ✅ DOZWOLONE: Tylko przepisanie istniejących informacji z CV w bardziej profesjonalny sposób
     4. ✅ DOZWOLONE: Uporządkowanie i lepsze sformułowanie tego, co już jest w CV
-    5. ✅ DOSTOSOWANIE BRANŻOWE: Użyj terminologii i stylu właściwego dla rozpoznanej branży
+    5. ✅ INTELIGENTNE PRZEKSZTAŁCENIE: Znajdź w każdym doświadczeniu elementy pasujące do stanowiska docelowego
+    6. ✅ DOSTOSOWANIE BRANŻOWE: Użyj terminologii i stylu właściwego dla rozpoznanej branży
 
-    KROK 1 - ROZPOZNANIE BRANŻY:
+    KROK 1 - GŁĘBOKA ANALIZA STANOWISKA DOCELOWEGO:
+    Przeanalizuj szczegółowo opis stanowiska i wyciągnij kluczowe informacje:
+    - Główne obowiązki i odpowiedzialności
+    - Wymagane umiejętności techniczne (konkretne narzędzia, technologie)
+    - Wymagane umiejętności miękkie (komunikacja, zarządzanie, liderstwo)
+    - Branżowe słowa kluczowe i terminologia
+    - Typ pracy (biurowa, fizyczna, zdalna, terenowa, mieszana)
+    - Specyficzne wymagania firmy (wielkość, kultura, wartości)
+    - Poziom doświadczenia (junior, mid, senior)
+    - Priorytety rekrutera (co jest najważniejsze w kandydacie)
+
+    KROK 2 - ROZPOZNANIE BRANŻY I KONTEKSTU:
     Na podstawie doświadczenia zawodowego, umiejętności i wykształcenia określ główną branżę/sektor:
     - IT/Technologie (programowanie, systemy, data science)
     - Finanse/Bankowość (księgowość, analizy finansowe, banking)
@@ -697,6 +709,13 @@ def optimize_cv(cv_text, job_description, language='pl', is_premium=False, payme
     - Inżynieria/Produkcja (mechanical, electrical, civil engineering)
     - HR/Zarządzanie (kadry, zarządzanie projektami)
     - Inne (określ konkretnie)
+
+    KROK 3 - MAPOWANIE DOŚWIADCZENIA:
+    Dla każdego stanowiska z CV znajdź i podkreśl elementy pasujące do stanowiska docelowego:
+    - Jakie umiejętności transferowalne można wyeksponować
+    - Które obowiązki można przeformułować jako relevant
+    - Jakie branżowe terminy użyć
+    - Jak połączyć doświadczenie z wymaganiami
 
     INSTRUKCJE SZCZEGÓŁOWE Z KONTEKSTEM BRANŻOWYM:
 
@@ -709,17 +728,28 @@ def optimize_cv(cv_text, job_description, language='pl', is_premium=False, payme
        - Użyj tylko tych umiejętności, które są faktycznie wymienione w CV
        - NIE wymyślaj branży ani specjalizacji, których nie ma w oryginale
 
-    3. DOŚWIADCZENIE ZAWODOWE:
+    3. DOŚWIADCZENIE ZAWODOWE - INTELIGENTNE PRZEPISYWANIE:
        - Przepisz każde stanowisko DOKŁADNIE jak w oryginale (firma, stanowisko, daty)
-       - Dla każdego miejsca pracy napisz 3-4 punkty opisujące obowiązki
+       - Dla każdego miejsca pracy napisz 4-6 punktów opisujących obowiązki
        - Bazuj punkty TYLKO na informacjach z oryginalnego CV
-       - Użyj profesjonalnych czasowników (planowałem, koordynowałem, obsługiwałem)
-       - NIE dodawaj liczb, procent ani wymyślonych osiągnięć
+       - KLUCZOWE: Znajdź w każdym doświadczeniu elementy pasujące do stanowiska docelowego:
+         * Czy kandydat pracował z klientami? → Podkreśl umiejętności komunikacyjne
+         * Czy zarządzał czasem/terminami? → Podkreśl organizację i terminowość
+         * Czy pracował w zespole? → Podkreśl współpracę i umiejętności interpersonalne
+         * Czy rozwiązywał problemy? → Podkreśl kreatywność i myślenie analityczne
+         * Czy używał technologii/narzędzi? → Podkreśl umiejętności techniczne
+         * Czy miał odpowiedzialność? → Podkreśl samodzielność i niezawodność
+       - Użyj profesjonalnych czasowników dopasowanych do branży:
+         * IT: implementowałem, optymalizowałem, konfigurowałem, testowałem
+         * Logistyka: koordynowałem, planowałem, monitorowałem, realizowałem
+         * Sprzedaż: pozyskiwałem, prezentowałem, negocjowałem, budowałem relacje
+         * Finanse: analizowałem, prognozowałem, kontrolowałem, raportowałem
        - KLUCZOWE: Jeśli są podobne stanowiska (np. "Kurier" w różnych firmach), stwórz RÓŻNE opisy dla każdego z nich:
          * Skupiaj się na różnych aspektach tej samej pracy
          * Użyj specyfiki każdej firmy (DHL = międzynarodowe, DPD = lokalne, UPS = biznesowe)
          * Zastosuj różne terminy branżowe dla każdego stanowiska
          * Podkreśl inne umiejętności w każdym opisie
+         * Znajdź unikalne elementy w każdym doświadczeniu
 
     4. UMIEJĘTNOŚCI:
        - Przepisz TYLKO te umiejętności, które są wymienione w oryginalnym CV
@@ -734,13 +764,28 @@ def optimize_cv(cv_text, job_description, language='pl', is_premium=False, payme
        - Wyeksponuj te elementy z CV, które pasują do opisu stanowiska
        - Ale NIE dodawaj nowych elementów - tylko lepiej opisuj istniejące
 
-    PRZYKŁAD DOBREGO PODEJŚCIA:
+    PRZYKŁADY INTELIGENTNEGO PRZEPISYWANIA DOŚWIADCZENIA:
+
+    STANOWISKO DOCELOWE: "Specjalista ds. obsługi klienta"
+    
     Oryginał: "Dostarczanie paczek"
-    Zoptymalizowane: "Realizowałem terminowe dostawy paczek do klientów"
+    ✅ Zoptymalizowane: "Realizowałem terminowe dostawy paczek do klientów, dbając o wysoką jakość obsługi i profesjonalne relacje z odbiorcami"
+    
+    Oryginał: "Praca w magazynie"
+    ✅ Zoptymalizowane: "Koordynowałem procesy magazynowe, współpracowałem z zespołem i zapewniałem terminową realizację zamówień klientów"
+    
+    STANOWISKO DOCELOWE: "Asystent administratora"
+    
+    Oryginał: "Sprzątanie biura"
+    ✅ Zoptymalizowane: "Utrzymywałem porządek w przestrzeni biurowej, dbałem o organizację dokumentów i wspierałem funkcjonowanie zespołu"
+    
+    Oryginał: "Obsługa kasy"
+    ✅ Zoptymalizowane: "Prowadziłem dokumentację transakcji, obsługiwałem systemy płatności i zapewniałem precyzyjne prowadzenie ewidencji"
 
     PRZYKŁAD ZŁEGO PODEJŚCIA (NIE RÓB TEGO):
     ❌ "Zwiększyłem efektywność dostaw o 25%" (gdy nie ma takiej informacji w CV)
     ❌ "Zarządzałem zespołem 5 kurierów" (gdy nie ma takiej informacji w CV)
+    ❌ "Wdrożyłem nowy system CRM" (gdy nie ma takiej informacji w CV)
 
     PRZYKŁADY RÓŻNICOWANIA PODOBNYCH STANOWISK:
     
@@ -771,18 +816,42 @@ def optimize_cv(cv_text, job_description, language='pl', is_premium=False, payme
 
     ODPOWIEDŹ W FORMACIE JSON:
     {{
-        "detected_industry": "rozpoznana branża/sektor",
-        "industry_keywords": ["słowo kluczowe 1", "słowo kluczowe 2", "słowo kluczowe 3"],
-        "optimized_cv": "Kompletne zoptymalizowane CV z branżowym dostosowaniem",
+        "job_analysis": {{
+            "target_position": "Nazwa stanowiska z opisu",
+            "key_requirements": ["wymóg 1", "wymóg 2", "wymóg 3"],
+            "required_skills": ["umiejętność 1", "umiejętność 2", "umiejętność 3"],
+            "job_keywords": ["słowo kluczowe 1", "słowo kluczowe 2", "słowo kluczowe 3"],
+            "work_type": "rodzaj pracy (biurowa/fizyczna/zdalna/terenowa)"
+        }},
+        "cv_analysis": {{
+            "detected_industry": "rozpoznana branża/sektor",
+            "candidate_strengths": ["mocna strona 1", "mocna strona 2", "mocna strona 3"],
+            "transferable_skills": ["umiejętność transferowalna 1", "umiejętność transferowalna 2"],
+            "experience_mapping": {{
+                "previous_job_1": "Jak doświadczenie pasuje do stanowiska docelowego",
+                "previous_job_2": "Jak doświadczenie pasuje do stanowiska docelowego"
+            }}
+        }},
+        "optimization_strategy": {{
+            "positioning_approach": "Jak pozycjonujemy kandydata",
+            "key_transformations": ["transformacja 1", "transformacja 2", "transformacja 3"],
+            "emphasis_points": ["punkt do podkreślenia 1", "punkt do podkreślenia 2"],
+            "industry_keywords": ["słowo kluczowe branżowe 1", "słowo kluczowe branżowe 2"]
+        }},
+        "optimized_cv": "Kompletne zoptymalizowane CV z inteligentnym dopasowaniem do stanowiska",
+        "improvement_metrics": {{
+            "ats_compatibility_score": "[0-100]",
+            "job_match_score": "[0-100]",
+            "keyword_optimization_score": "[0-100]",
+            "experience_relevance_score": "[0-100]"
+        }},
         "key_improvements": [
-            "Dostosowano terminologię do branży [nazwa branży]",
-            "Podkreślono kluczowe umiejętności [konkretne umiejętności]",
-            "Wzmocniono sekcję [nazwa sekcji]"
+            "Zoptymalizowano opisy doświadczeń pod kątem [konkretne wymagania]",
+            "Podkreślono transferowalne umiejętności [konkretne umiejętności]",
+            "Dostosowano terminologię branżową do [nazwa branży]",
+            "Wzmocniono dopasowanie do wymagań stanowiska"
         ],
-        "ats_compatibility_score": "[0-100]",
-        "job_match_score": "[0-100]",
-        "positioning_strategy": "Jak kandydat jest pozycjonowany w branży",
-        "summary": "Zwięzłe podsumowanie wprowadzonych ulepszeń"
+        "summary": "Zwięzłe podsumowanie wprowadzonych ulepszeń z fokusem na dopasowanie do stanowiska"
     }}"""
 
     # Rozszerzony limit tokenów dla płacących użytkowników
@@ -813,6 +882,82 @@ def optimize_cv(cv_text, job_description, language='pl', is_premium=False, payme
         """
 
     return send_api_request(prompt, max_tokens=max_tokens, language=language)
+
+def analyze_job_requirements_deeply(job_description, language='pl'):
+    """
+    Głęboko analizuje wymagania stanowiska, aby lepiej dopasować CV
+    """
+    prompt = f"""
+    Przeanalizuj szczegółowo poniższy opis stanowiska i wyciągnij kluczowe informacje potrzebne do optymalizacji CV.
+    
+    OPIS STANOWISKA:
+    {job_description}
+    
+    ZADANIA DO WYKONANIA:
+    
+    1. IDENTYFIKACJA GŁÓWNYCH WYMAGAŃ:
+    - Jakie są kluczowe obowiązki na tym stanowisku?
+    - Jakie umiejętności techniczne są wymagane?
+    - Jakie umiejętności miękkie są ważne?
+    - Jaki poziom doświadczenia jest oczekiwany?
+    
+    2. ANALIZA SŁÓW KLUCZOWYCH:
+    - Znajdź 10-15 najważniejszych słów kluczowych z branży
+    - Zidentyfikuj terminy techniczne specyficzne dla stanowiska
+    - Wyodrębnij frazy, które powinny znajdować się w CV
+    
+    3. PROFIL IDEALNEGO KANDYDATA:
+    - Jakie doświadczenie zawodowe byłoby idealne?
+    - Jakie cechy osobowościowe są pożądane?
+    - Jakie osiągnięcia czy projekty byłyby wartościowe?
+    
+    4. STRATEGIA DOPASOWANIA:
+    - Na co rekruter będzie zwracał uwagę w CV?
+    - Jakie elementy doświadczenia można przeformułować jako relevant?
+    - Jakie umiejętności transferowalne będą wartościowe?
+    
+    Odpowiedź w formacie JSON:
+    {{
+        "position_analysis": {{
+            "job_title": "Nazwa stanowiska",
+            "industry": "Branża/sektor",
+            "seniority_level": "junior/mid/senior",
+            "work_type": "biurowa/fizyczna/zdalna/terenowa/mieszana"
+        }},
+        "key_requirements": {{
+            "primary_responsibilities": ["obowiązek 1", "obowiązek 2", "obowiązek 3"],
+            "technical_skills": ["umiejętność tech 1", "umiejętność tech 2", "umiejętność tech 3"],
+            "soft_skills": ["umiejętność miękka 1", "umiejętność miękka 2", "umiejętność miękka 3"],
+            "experience_requirements": ["wymaganie doświadczenia 1", "wymaganie doświadczenia 2"]
+        }},
+        "keyword_analysis": {{
+            "primary_keywords": ["słowo kluczowe 1", "słowo kluczowe 2", "słowo kluczowe 3"],
+            "technical_terms": ["termin techniczny 1", "termin techniczny 2"],
+            "industry_phrases": ["fraza branżowa 1", "fraza branżowa 2"],
+            "action_verbs": ["czasownik 1", "czasownik 2", "czasownik 3"]
+        }},
+        "ideal_candidate_profile": {{
+            "background": "Opis idealnego background kandydata",
+            "key_achievements": ["osiągnięcie 1", "osiągnięcie 2"],
+            "personality_traits": ["cecha 1", "cecha 2", "cecha 3"],
+            "deal_breakers": ["co może dyskwalifikować kandydata"]
+        }},
+        "matching_strategy": {{
+            "recruiter_priorities": ["priorytet 1", "priorytet 2", "priorytet 3"],
+            "transferable_skills_opportunities": ["możliwość 1", "możliwość 2"],
+            "positioning_advice": ["rada 1", "rada 2", "rada 3"],
+            "red_flags_to_avoid": ["co unikać w CV"]
+        }},
+        "optimization_focus": {{
+            "most_important_sections": ["sekcja 1", "sekcja 2"],
+            "key_phrases_to_include": ["fraza 1", "fraza 2", "fraza 3"],
+            "formatting_recommendations": ["rekomendacja 1", "rekomendacja 2"],
+            "ats_optimization_tips": ["tip 1", "tip 2", "tip 3"]
+        }}
+    }}
+    """
+    
+    return send_api_request(prompt, max_tokens=3000, language=language)
 
 def generate_recruiter_feedback(cv_text, job_description="", language='pl'):
     """

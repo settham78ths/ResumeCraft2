@@ -51,10 +51,15 @@ CV Optimizer Pro is an AI-powered resume optimization platform built with Flask 
 - Payment verification and status tracking
 - Webhook handling for payment confirmations
 
-### AI Analysis Engine
+### AI Analysis Engine - Enhanced Model
 - OpenRouter API integration with advanced prompt engineering
 - Multi-language support with context-aware responses
-- CV optimization for specific job positions
+- **Enhanced CV optimization** with intelligent job description analysis
+- **Deep experience mapping** - transforms each job experience to match target position
+- **Industry-specific terminology** adaptation and professional rewriting
+- **Transferable skills identification** - finds relevant elements in any experience
+- **Intelligent differentiation** - creates unique descriptions for similar positions
+- **Advanced job matching** - analyzes requirements and maps to candidate strengths
 - Cover letter generation and interview preparation
 - Grammar and style checking with professional recommendations
 
@@ -128,6 +133,11 @@ CV Optimizer Pro is an AI-powered resume optimization platform built with Flask 
 - User activity tracking and analytics
 
 ## Recent Changes
+- July 17, 2025: Enhanced AI model for better CV optimization based on job descriptions
+- July 17, 2025: Improved work experience analysis and intelligent job matching
+- July 17, 2025: Added transferable skills identification and industry-specific terminology
+- July 17, 2025: Fixed security middleware issues blocking legitimate CV processing
+- July 17, 2025: Added get_full_name() method to User model for proper navigation display
 - June 24, 2025: Fixed database connection issues by creating new Replit PostgreSQL database
 - June 24, 2025: Updated database configuration to use built-in Replit database instead of external Neon service
 - June 24, 2025: Initialized database tables and created developer account
