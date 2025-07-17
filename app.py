@@ -139,14 +139,15 @@ def parse_ai_json_response(ai_result):
             clean_result = clean_result[json_start:json_end]
 
         parsed_result = json.loads(clean_result)
-        optimized_cv = parsed_result.get('optimized_cv', ai_result)
-        logger.debug(
-            f"Successfully parsed AI response, extracted optimized_cv")
-        return optimized_cv
+        
+        # Return the parsed JSON object, not just optimized_cv
+        logger.debug(f"Successfully parsed AI response as JSON")
+        return parsed_result
 
     except (json.JSONDecodeError, TypeError) as e:
         logger.warning(f"Failed to parse AI response as JSON: {e}")
-        return ai_result
+        # Return as dict with original content if parsing fails
+        return {"optimized_cv": ai_result, "error": "Failed to parse JSON"}
 
 
 @app.route('/')
@@ -846,29 +847,8 @@ def generate_ai_cv():
             brief_background=basic_info['brief_background'],
             language='pl')
 
-        # Parse AI response
-        import json
-        try:
-            cv_content = json.loads(ai_cv_content)
-        except json.JSONDecodeError:
-            # Fallback parsing - extract JSON from AI response
-            import re
-            json_match = re.search(r'\{.*\}', ai_cv_content, re.DOTALL)
-            if json_match:
-                try:
-                    cv_content = json.loads(json_match.group())
-                except json.JSONDecodeError:
-                    logger.error("Failed to parse extracted JSON from AI response")
-                    return jsonify({
-                        'success': False,
-                        'message': 'Błąd podczas przetwarzania odpowiedzi AI'
-                    }), 500
-            else:
-                logger.error("No JSON found in AI response")
-                return jsonify({
-                    'success': False,
-                    'message': 'Nieprawidłowa odpowiedź AI - brak danych JSON'
-                }), 500
+        # Parse AI response using the fixed function
+        cv_content = parse_ai_json_response(ai_cv_content)
 
         # Log successful parsing
         logger.debug(f"Successfully parsed AI response. Keys available: {list(cv_content.keys()) if isinstance(cv_content, dict) else 'Not a dict'}")

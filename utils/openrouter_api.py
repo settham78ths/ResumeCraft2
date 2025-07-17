@@ -29,8 +29,8 @@ def send_api_request(prompt, max_tokens=2000, language='pl'):
 
     # Language-specific system prompts
     language_prompts = {
-        'pl': "Jesteś ekspertem w optymalizacji CV i doradcą kariery. ZAWSZE odpowiadaj w języku polskim, niezależnie od języka CV lub opisu pracy. Używaj polskiej terminologii HR i poprawnej polszczyzny.",
-        'en': "You are an expert resume editor and career advisor. ALWAYS respond in English, regardless of the language of the CV or job description. Use proper English HR terminology and grammar."
+        'pl': "Jesteś ekspertem w optymalizacji CV i doradcą kariery. ZAWSZE odpowiadaj w języku polskim, niezależnie od języka CV lub opisu pracy. Używaj polskiej terminologii HR i poprawnej polszczyzny. Gdy proszę o JSON, zwracaj WYŁĄCZNIE prawidłowy JSON bez żadnych dodatkowych tekstów.",
+        'en': "You are an expert resume editor and career advisor. ALWAYS respond in English, regardless of the language of the CV or job description. Use proper English HR terminology and grammar. When asked for JSON, return ONLY valid JSON without any additional text."
     }
 
     system_prompt = DEEP_REASONING_PROMPT + "\n" + language_prompts.get(language, language_prompts['pl'])
@@ -622,6 +622,7 @@ def generate_complete_cv_content(target_position, experience_level, industry, br
     - Używaj polskiej terminologii HR
     - Dostosuj język do poziomu stanowiska
     - Wszystkie informacje muszą być spójne logicznie
+    - ZAWSZE zwracaj prawidłowy JSON bez żadnych dodatkowych tekstów
 
     PRZYKŁADY PROGRESJI KARIERY:
 
@@ -634,7 +635,7 @@ def generate_complete_cv_content(target_position, experience_level, industry, br
     SENIOR LEVEL:
     - Kierownik → Menedżer → Dyrektor/Kierownik Działu
 
-    Odpowiedź w formacie JSON:
+    ZWRÓĆ WYŁĄCZNIE PRAWIDŁOWY JSON W DOKŁADNIE TYM FORMACIE:
     {{
         "professional_title": "Tytuł zawodowy do CV",
         "professional_summary": "Podsumowanie zawodowe 80-120 słów",
