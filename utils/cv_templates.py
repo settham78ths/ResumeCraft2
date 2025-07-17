@@ -481,7 +481,7 @@ class CVTemplateGenerator:
         buffer.seek(0)
         return buffer
 
-def generate_modern_green_cv(self, cv_data):
+    def generate_modern_green_cv(self, cv_data):
         """Generate modern green CV template"""
         buffer = io.BytesIO()
         doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=2*cm, leftMargin=2*cm, 
