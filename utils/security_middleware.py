@@ -55,4 +55,30 @@ class SecurityMiddleware:
         self.blocked_ips.add(ip)
         logger.info(f"IP blocked: {ip}")
 
+    def is_suspicious_content(self, data):
+        """Check if request contains suspicious content"""
+        if not data:
+            return False
+
+        data_str = str(data).lower()
+
+        # Check for suspicious patterns (exclude legitimate CV content)
+        suspicious_patterns = [
+            '<script>', '<iframe', 'javascript:', 'vbscript:',
+            'document.cookie', 'window.location'
+        ]
+
+        # Don't flag legitimate CV processing terms
+        cv_terms = [
+            'optimize', 'feedback', 'cover_letter', 'ats_check',
+            'interview_questions', 'cv_score', 'keyword_analysis',
+            'grammar_check', 'position_optimization'
+        ]
+
+        # If it contains CV terms, it's likely legitimate
+        if any(term in data_str for term in cv_terms):
+            return False
+
+        return any(pattern in data_str for pattern in suspicious_patterns)
+
 security_middleware = SecurityMiddleware()
