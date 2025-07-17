@@ -46,7 +46,7 @@ def check_imports():
     
     packages = [
         'flask', 'flask_sqlalchemy', 'flask_login', 'flask_bcrypt',
-        'stripe', 'openai', 'requests', 'reportlab', 'beautifulsoup4'
+        'stripe', 'openai', 'requests', 'reportlab', 'bs4'
     ]
     
     all_good = True
