@@ -139,7 +139,7 @@ def parse_ai_json_response(ai_result):
             clean_result = clean_result[json_start:json_end]
 
         parsed_result = json.loads(clean_result)
-        
+
         # Return the parsed JSON object, not just optimized_cv
         logger.debug(f"Successfully parsed AI response as JSON")
         return parsed_result
@@ -961,7 +961,7 @@ def create_pdf_payment():
     """Create payment for PDF download (14.99 PLN)"""
     try:
         data = request.get_json()
-        
+
         # Store PDF data for after payment
         session['pending_pdf_data'] = data.get('pdf_data')
         session['pending_pdf_filename'] = data.get('filename')
@@ -1009,26 +1009,26 @@ def pdf_download_success():
     try:
         pdf_data = session.get('pending_pdf_data')
         filename = session.get('pending_pdf_filename', 'CV.pdf')
-        
+
         if not pdf_data:
             flash('Brak danych PDF do pobrania', 'error')
             return redirect(url_for('ai_cv_generator'))
-        
+
         # Clear session data
         session.pop('pending_pdf_data', None)
         session.pop('pending_pdf_filename', None)
-        
+
         # Return PDF as download
         from flask import make_response
         import base64
-        
+
         pdf_bytes = base64.b64decode(pdf_data)
         response = make_response(pdf_bytes)
         response.headers['Content-Type'] = 'application/pdf'
         response.headers['Content-Disposition'] = f'attachment; filename="{filename}"'
-        
+
         return response
-        
+
     except Exception as e:
         logger.error(f"Error in PDF download success: {str(e)}")
         flash('Wystąpił błąd podczas pobierania PDF', 'error')
@@ -1157,147 +1157,135 @@ def generate_cv_pdf_file(cv_data):
 @login_required
 @rate_limit('cv_process')
 def process_cv():
-    # PRODUCTION MODE - Payment required except for developer account
-    # Sprawdzenie czy to konto developer (darmowy dostęp)
-    if current_user.username == 'developer':
-        # Developer account - free access
-        pass
-    elif not session.get('payment_verified'):
-        return jsonify({
-            'success': False,
-            'message':
-            'Aby wygenerować CV, musisz najpierw dokonać płatności 9,99 PLN.',
-            'payment_required': True
-        }), 402  # Payment Required
-
-    data = request.json
-    cv_text = data.get('cv_text') or session.get('cv_text')
-    job_url = data.get('job_url', '')
-    selected_option = data.get('selected_option', '')
-    roles = data.get('roles', [])
-    language = data.get('language', 'pl')  # Default to Polish
-
-    if not cv_text:
-        return jsonify({
-            'success': False,
-            'message': 'No CV text found. Please upload a CV first.'
-        }), 400
-
-    # Process Job URL if provided
-    extracted_job_description = ''
-    if job_url:
-        try:
-            extracted_job_description = analyze_job_url(job_url)
-        except Exception as e:
-            logger.error(
-                f"Error extracting job description from URL: {str(e)}")
-            return jsonify({
-                'success':
-                False,
-                'message':
-                f"Error extracting job description from URL: {str(e)}"
-            }), 500
-
     try:
-        job_description = data.get('job_description',
-                                   extracted_job_description)
-        result = None
+        data = request.json
+        cv_text = data.get('cv_text') or session.get('cv_text')
+        job_url = data.get('job_url', '')
+        selected_option = data.get('selected_option', '')
+        roles = data.get('roles', [])
+        language = data.get('language', 'pl')  # Default to Polish
 
-        options_handlers = {
-            'optimize': optimize_cv,
-            'feedback': generate_recruiter_feedback,
-            'cover_letter': generate_cover_letter,
-            'ats_check': ats_optimization_check,
-            'interview_questions': generate_interview_questions,
-            'cv_score': analyze_cv_score,
-            'keyword_analysis': analyze_keywords_match,
-            'grammar_check': check_grammar_and_style,
-            'position_optimization': optimize_for_position,
-            'interview_tips': generate_interview_tips,
-            'advanced_position_optimization': 'advanced_position_optimization'
-        }
-
-        if selected_option not in options_handlers:
+        if not cv_text:
             return jsonify({
                 'success': False,
-                'message': 'Invalid option selected.'
+                'message': 'No CV text found. Please upload a CV first.'
             }), 400
 
-        # Sprawdź status płatności i dostępu
-        payment_verified = session.get('payment_verified',
-                                       False)  # 9,99 PLN - jednorazowe CV
-        is_developer = current_user.username == 'developer'
-        is_premium_active = current_user.is_premium_active(
-        )  # 29,99 PLN - Premium
+    # Process Job URL if provided
+        extracted_job_description = ''
+        if job_url:
+            try:
+                extracted_job_description = analyze_job_url(job_url)
+            except Exception as e:
+                logger.error(
+                    f"Error extracting job description from URL: {str(e)}")
+                return jsonify({
+                    'success':
+                    False,
+                    'message':
+                    f"Error extracting job description from URL: {str(e)}"
+                }), 500
 
-        # Definicja funkcji według poziomów dostępu - zgodnie ze screenem
-        basic_paid_functions = [
-            'optimize', 'ats_optimization_check', 'grammar_check'
-        ]  # Za 9,99 PLN - 3 funkcje podstawowe
-        premium_functions = [
-            'recruiter_feedback', 'cover_letter', 'cv_score', 'interview_tips',
-            'keyword_analysis', 'position_optimization',
-            'advanced_position_optimization'
-        ]  # Premium 29,99 PLN/miesiąc - wszystkie funkcje ze screena + nowa zaawansowana
-        cv_builder_functions = ['cv_builder'
-                                ]  # STWÓRZ CV SAMEMU - oddzielna płatna usługa
-        free_functions = []  # Tylko podgląd ze znakiem wodnym dla bezpłatnych
+        try:
+            job_description = data.get('job_description',
+                                       extracted_job_description)
+            result = None
 
-        logger.info(
-            f"Processing CV with language: {language}, option: {selected_option}"
-        )
+            options_handlers = {
+                'optimize': optimize_cv,
+                'feedback': generate_recruiter_feedback,
+                'cover_letter': generate_cover_letter,
+                'ats_check': ats_optimization_check,
+                'interview_questions': generate_interview_questions,
+                'cv_score': analyze_cv_score,
+                'keyword_analysis': analyze_keywords_match,
+                'grammar_check': check_grammar_and_style,
+                'position_optimization': optimize_for_position,
+                'interview_tips': generate_interview_tips,
+                'advanced_position_optimization': 'advanced_position_optimization'
+            }
 
-        # Sprawdź dostęp do funkcji według poziomów płatności
-        if selected_option in premium_functions:
-            # Funkcje tylko dla Premium (29,99 PLN/miesiąc)
-            if not is_developer and not is_premium_active:
+            if selected_option not in options_handlers:
                 return jsonify({
                     'success': False,
-                    'message':
-                    'Ta funkcja jest dostępna tylko dla użytkowników Premium. Wykup subskrypcję za 29,99 PLN/miesiąc.',
-                    'premium_required': True
-                }), 403
+                    'message': 'Invalid option selected.'
+                }), 400
 
-        elif selected_option in basic_paid_functions:
-            # Funkcje za 9,99 PLN lub Premium
-            if not is_developer and not payment_verified and not is_premium_active:
-                return jsonify({
-                    'success': False,
-                    'message':
-                    'Ta funkcja wymaga płatności. Zapłać 9,99 PLN za jednorazowe CV lub 29,99 PLN za Premium.',
-                    'payment_required': True
-                }), 403
+            # Sprawdź status płatności i dostępu
+            payment_verified = session.get('payment_verified',
+                                           False)  # 9,99 PLN - jednorazowe CV
+            is_developer = current_user.username == 'developer'
+            is_premium_active = current_user.is_premium_active(
+            )  # 29,99 PLN - Premium
 
-        elif selected_option in cv_builder_functions:
-            # STWÓRZ CV SAMEMU - oddzielna płatna usługa
-            cv_builder_paid = session.get('cv_builder_paid', False)
-            if not is_developer and not cv_builder_paid:
-                return jsonify({
-                    'success': False,
-                    'message':
-                    'Funkcja STWÓRZ CV SAMEMU wymaga oddzielnej płatności.',
-                    'cv_builder_payment_required': True
-                }), 403
+            # Definicja funkcji według poziomów dostępu - zgodnie ze screenem
+            basic_paid_functions = [
+                'optimize', 'ats_optimization_check', 'grammar_check'
+            ]  # Za 9,99 PLN - 3 funkcje podstawowe
+            premium_functions = [
+                'recruiter_feedback', 'cover_letter', 'cv_score', 'interview_tips',
+                'keyword_analysis', 'position_optimization',
+                'advanced_position_optimization'
+            ]  # Premium 29,99 PLN/miesiąc - wszystkie funkcje ze screena + nowa zaawansowana
+            cv_builder_functions = ['cv_builder'
+                                    ]  # STWÓRZ CV SAMEMU - oddzielna płatna usługa
+            free_functions = []  # Tylko podgląd ze znakiem wodnym dla bezpłatnych
 
-        # Obsługa funkcji według poziomów dostępu
-        if selected_option == 'optimize':
-            # Funkcja za 9,99 PLN lub Premium
-            if not is_developer and not payment_verified and not is_premium_active:
-                ai_result = optimize_cv(cv_text,
-                                        job_description,
-                                        language,
-                                        is_premium=False,
-                                        payment_verified=False)
-                result = parse_ai_json_response(ai_result)
-                result = add_watermark_to_cv(result)
-            else:
-                # Pełne CV dla płacących lub Premium
-                ai_result = optimize_cv(cv_text,
-                                        job_description,
-                                        language,
-                                        is_premium=is_premium_active,
-                                        payment_verified=True)
-                result = parse_ai_json_response(ai_result)
+            logger.info(
+                f"Processing CV with language: {language}, option: {selected_option}"
+            )
+
+            # Sprawdź dostęp do funkcji według poziomów płatności
+            if selected_option in premium_functions:
+                # Funkcje tylko dla Premium (29,99 PLN/miesiąc)
+                if not is_developer and not is_premium_active:
+                    return jsonify({
+                        'success': False,
+                        'message':
+                        'Ta funkcja jest dostępna tylko dla użytkowników Premium. Wykup subskrypcję za 29,99 PLN/miesiąc.',
+                        'premium_required': True
+                    }), 403
+
+            elif selected_option in basic_paid_functions:
+                # Funkcje za 9,99 PLN lub Premium
+                if not is_developer and not payment_verified and not is_premium_active:
+                    return jsonify({
+                        'success': False,
+                        'message':
+                        'Ta funkcja wymaga płatności. Zapłać 9,99 PLN za jednorazowe CV lub 29,99 PLN za Premium.',
+                        'payment_required': True
+                    }), 403
+
+            elif selected_option in cv_builder_functions:
+                # STWÓRZ CV SAMEMU - oddzielna płatna usługa
+                cv_builder_paid = session.get('cv_builder_paid', False)
+                if not is_developer and not cv_builder_paid:
+                    return jsonify({
+                        'success': False,
+                        'message':
+                        'Funkcja STWÓRZ CV SAMEMU wymaga oddzielnej płatności.',
+                        'cv_builder_payment_required': True
+                    }), 403
+
+            # Obsługa funkcji według poziomów dostępu
+            if selected_option == 'optimize':
+                # Funkcja za 9,99 PLN lub Premium
+                if not is_developer and not payment_verified and not is_premium_active:
+                    ai_result = optimize_cv(cv_text,
+                                            job_description,
+                                            language,
+                                            is_premium=False,
+                                            payment_verified=False)
+                    result = parse_ai_json_response(ai_result)
+                    result = add_watermark_to_cv(result)
+                else:
+                    # Pełne CV dla płacących lub Premium
+                    ai_result = optimize_cv(cv_text,
+                                            job_description,
+                                            language,
+                                            is_premium=is_premium_active,
+                                            payment_verified=True)
+                    result = parse_ai_json_response(ai_result)
 
         elif selected_option == 'ats_optimization_check':
             # Funkcja za 9,99 PLN lub Premium
@@ -1352,7 +1340,7 @@ def process_cv():
         if selected_option in ['optimize', 'position_optimization']:
             session['last_optimized_cv'] = result
 
-        # Zapisz wynik analizy w bazie danych
+            # Zapisz wynik analizy w bazie danych
         cv_upload_id = session.get('cv_upload_id')
         if cv_upload_id:
             try:
@@ -1446,7 +1434,7 @@ def apply_recruiter_feedback():
             is_premium=is_premium_active,
             payment_verified=payment_verified or is_developer)
 
-        # Parse JSON response
+    # Parse JSON response
         result = parse_ai_json_response(ai_result)
 
         # Store improved CV for comparison
@@ -1454,7 +1442,7 @@ def apply_recruiter_feedback():
             session['last_optimized_cv'] = result['improved_cv']
             session['last_feedback_applied'] = True
 
-        # Zapisz wynik w bazie danych
+            # Zapisz wynik w bazie danych
         cv_upload_id = session.get('cv_upload_id')
         if cv_upload_id:
             try:
@@ -1523,7 +1511,7 @@ def analyze_job_posting():
                     'message': f'Błąd podczas analizy URL: {str(e)}'
                 }), 500
 
-        # Analizuj opis stanowiska
+    # Analizuj opis stanowiska
         from utils.openrouter_api import analyze_polish_job_posting
         analysis_result = analyze_polish_job_posting(job_description, language)
 

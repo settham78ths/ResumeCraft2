@@ -220,11 +220,11 @@ def apply_recruiter_feedback_to_cv(cv_text, recruiter_feedback, job_description=
     """
     Apply recruiter feedback suggestions directly to the CV - PAID FEATURE
     """
-    
+
     if is_premium:
         max_tokens = 6000
         prompt_suffix = """
-        
+
         TRYB PREMIUM - ZASTOSOWANIE POPRAWEK REKRUTERA:
         - Implementuj WSZYSTKIE sugestie z opinii rekrutera
         - Przepisz CV zgodnie z każdą rekomendacją
@@ -235,7 +235,7 @@ def apply_recruiter_feedback_to_cv(cv_text, recruiter_feedback, job_description=
     elif payment_verified:
         max_tokens = 4000  
         prompt_suffix = """
-        
+
         TRYB PŁATNY - ZASTOSOWANIE POPRAWEK:
         - Implementuj główne sugestie z opinii rekrutera
         - Przepisz sekcje zgodnie z rekomendacjami
@@ -482,13 +482,13 @@ def optimize_cv_for_specific_position(cv_text, target_position, job_description,
     ✅ Zoptymalizowane: "Koordynowałem procesy magazynowe, optymalizowałem przepływy towarów i zarządzałem dokumentacją logistyczną"
 
     PRZYKŁAD RÓŻNICOWANIA PODOBNYCH STANOWISK:
-    
+
     STANOWISKO 1: "Kurier - DHL" (2022-2023)
     ✅ Opis 1: "Wykonywałem ekspresowe dostawy międzynarodowe, obsługiwałem system śledzenia przesyłek i zapewniałem terminowość dostaw zgodnie z procedurami DHL"
-    
+
     STANOWISKO 2: "Kurier - DPD" (2021-2022)  
     ✅ Opis 2: "Realizowałem dostawy lokalne na terenie miasta, utrzymywałem kontakt z klientami i optymalizowałem trasy dostaw dla maksymalnej efektywności"
-    
+
     STANOWISKO 3: "Kurier - UPS" (2020-2021)
     ✅ Opis 3: "Odpowiadałem za dostawy biznesowe do firm, zarządzałem dokumentacją celną przesyłek zagranicznych i współpracowałem z działem obsługi klienta"
 
@@ -768,18 +768,18 @@ def optimize_cv(cv_text, job_description, language='pl', is_premium=False, payme
     PRZYKŁADY INTELIGENTNEGO PRZEPISYWANIA DOŚWIADCZENIA:
 
     STANOWISKO DOCELOWE: "Specjalista ds. obsługi klienta"
-    
+
     Oryginał: "Dostarczanie paczek"
     ✅ Zoptymalizowane: "Realizowałem terminowe dostawy paczek do klientów, dbając o wysoką jakość obsługi i profesjonalne relacje z odbiorcami"
-    
+
     Oryginał: "Praca w magazynie"
     ✅ Zoptymalizowane: "Koordynowałem procesy magazynowe, współpracowałem z zespołem i zapewniałem terminową realizację zamówień klientów"
-    
+
     STANOWISKO DOCELOWE: "Asystent administratora"
-    
+
     Oryginał: "Sprzątanie biura"
     ✅ Zoptymalizowane: "Utrzymywałem porządek w przestrzeni biurowej, dbałem o organizację dokumentów i wspierałem funkcjonowanie zespołu"
-    
+
     Oryginał: "Obsługa kasy"
     ✅ Zoptymalizowane: "Prowadziłem dokumentację transakcji, obsługiwałem systemy płatności i zapewniałem precyzyjne prowadzenie ewidencji"
 
@@ -789,15 +789,15 @@ def optimize_cv(cv_text, job_description, language='pl', is_premium=False, payme
     ❌ "Wdrożyłem nowy system CRM" (gdy nie ma takiej informacji w CV)
 
     PRZYKŁADY RÓŻNICOWANIA PODOBNYCH STANOWISK:
-    
+
     Jeśli w CV są 3 stanowiska "Kurier" w różnych firmach:
-    
+
     STANOWISKO 1: "Kurier - DHL" (2022-2023)
     ✅ Opis 1: "Wykonywałem ekspresowe dostawy międzynarodowe, obsługiwałem system śledzenia przesyłek i zapewniałem terminowość dostaw zgodnie z procedurami DHL"
-    
+
     STANOWISKO 2: "Kurier - DPD" (2021-2022)  
     ✅ Opis 2: "Realizowałem dostawy lokalne na terenie miasta, utrzymywałem kontakt z klientami i optymalizowałem trasy dostaw dla maksymalnej efektywności"
-    
+
     STANOWISKO 3: "Kurier - UPS" (2020-2021)
     ✅ Opis 3: "Odpowiadałem za dostawy biznesowe do firm, zarządzałem dokumentacją celną przesyłek zagranicznych i współpracowałem z działem obsługi klienta"
 
@@ -855,6 +855,15 @@ def optimize_cv(cv_text, job_description, language='pl', is_premium=False, payme
         "summary": "Zwięzłe podsumowanie wprowadzonych ulepszeń z fokusem na dopasowanie do stanowiska"
     }}"""
 
+    response_format = '''
+        WAŻNE: Odpowiedz WYŁĄCZNIE w formacie JSON, bez żadnych dodatkowych tagów lub komentarzy:
+        {
+            "optimized_cv": "TUTAJ KOMPLETNE ZOPTYMALIZOWANE CV",
+            "changes_made": ["lista zmian", "które zostały wprowadzone"],
+            "improvement_score": "ocena poprawy w skali 1-10"
+        }
+        '''
+
     # Rozszerzony limit tokenów dla płacących użytkowników
     if is_premium or payment_verified:
         # Płacący użytkownicy - znacznie rozszerzony limit tokenów
@@ -890,33 +899,33 @@ def analyze_job_requirements_deeply(job_description, language='pl'):
     """
     prompt = f"""
     Przeanalizuj szczegółowo poniższy opis stanowiska i wyciągnij kluczowe informacje potrzebne do optymalizacji CV.
-    
+
     OPIS STANOWISKA:
     {job_description}
-    
+
     ZADANIA DO WYKONANIA:
-    
+
     1. IDENTYFIKACJA GŁÓWNYCH WYMAGAŃ:
     - Jakie są kluczowe obowiązki na tym stanowisku?
     - Jakie umiejętności techniczne są wymagane?
     - Jakie umiejętności miękkie są ważne?
     - Jaki poziom doświadczenia jest oczekiwany?
-    
+
     2. ANALIZA SŁÓW KLUCZOWYCH:
     - Znajdź 10-15 najważniejszych słów kluczowych z branży
     - Zidentyfikuj terminy techniczne specyficzne dla stanowiska
     - Wyodrębnij frazy, które powinny znajdować się w CV
-    
+
     3. PROFIL IDEALNEGO KANDYDATA:
     - Jakie doświadczenie zawodowe byłoby idealne?
     - Jakie cechy osobowościowe są pożądane?
     - Jakie osiągnięcia czy projekty byłyby wartościowe?
-    
+
     4. STRATEGIA DOPASOWANIA:
     - Na co rekruter będzie zwracał uwagę w CV?
     - Jakie elementy doświadczenia można przeformułować jako relevant?
     - Jakie umiejętności transferowalne będą wartościowe?
-    
+
     Odpowiedź w formacie JSON:
     {{
         "position_analysis": {{
@@ -957,7 +966,7 @@ def analyze_job_requirements_deeply(job_description, language='pl'):
         }}
     }}
     """
-    
+
     return send_api_request(prompt, max_tokens=3000, language=language)
 
 def generate_recruiter_feedback(cv_text, job_description="", language='pl'):
@@ -1267,7 +1276,7 @@ def analyze_cv_strengths(cv_text, job_title="analityk danych", language='pl'):
 
     1. Zidentyfikuj i szczegółowo omów 5-7 najsilniejszych elementów CV, które są najbardziej wartościowe dla pracodawcy.
     2. Dla każdej mocnej strony wyjaśnij, dlaczego jest ona istotna właśnie dla stanowiska {job_title}.
-    3. Zaproponuj konkretne ulepszenia, które mogłyby wzmocnić te mocne strony.
+    3. Zaproponuj konkretne ulepszeń, które mogłyby wzmocnić te mocne strony.
     4. Wskaż obszary, które mogłyby zostać dodane lub rozbudowane, aby CV było jeszcze lepiej dopasowane do stanowiska.
     5. Zaproponuj, jak lepiej zaprezentować osiągnięcia i umiejętności, aby były bardziej przekonujące.
 
