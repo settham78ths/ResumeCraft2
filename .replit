@@ -9,3 +9,7 @@ run = ["sh", "-c", "python app.py"]
 
 [workflows]
 runButton = "Run CV Optimizer Pro"
+
+[[ports]]
+localPort = 5003
+externalPort = 3003
