@@ -323,7 +323,7 @@ document.addEventListener('DOMContentLoaded', function() {
             hideAlerts();
 
             // Wyślij zapytanie do serwera
-            fetch('/extract-job-info', {
+            fetch('/analyze-job-posting', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -346,8 +346,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log('📊 Response data:', data);
                 if (data.success) {
                     // Wypełnij automatycznie pola
-                    if (data.job_title && jobTitleInput) {
-                        jobTitleInput.value = data.job_title;
+                    if (data.analysis && data.analysis.job_title && jobTitleInput) {
+                        jobTitleInput.value = data.analysis.job_title;
                         // Dodaj efekt highlight
                         jobTitleInput.style.backgroundColor = '#d4edda';
                         setTimeout(() => {
@@ -355,8 +355,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         }, 2000);
                     }
 
-                    if (data.job_description && jobDescriptionInput) {
-                        jobDescriptionInput.value = data.job_description;
+                    if (data.raw_description && jobDescriptionInput) {
+                        jobDescriptionInput.value = data.raw_description;
                         // Dodaj efekt highlight
                         jobDescriptionInput.style.backgroundColor = '#d4edda';
                         setTimeout(() => {

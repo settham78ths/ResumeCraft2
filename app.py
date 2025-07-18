@@ -533,7 +533,6 @@ def compare_cv_versions():
 
 
 @app.route('/upload-cv', methods=['POST'])
-@login_required
 @rate_limit('cv_upload')
 def upload_cv():
     if 'cv_file' not in request.files:
@@ -616,15 +615,18 @@ def upload_cv():
                 f"Sugestie: {'; '.join(validation_results['suggestions'])}",
                 'info')
 
-        # Zapisz CV w bazie danych
-        cv_upload = CVUpload(user_id=current_user.id,
-                             filename=original_filename,
-                             original_text=cv_text,
-                             job_title=request.form.get('job_title', ''),
-                             job_description=request.form.get(
-                                 'job_description', ''))
-        db.session.add(cv_upload)
-        db.session.commit()
+        # Zapisz CV w bazie danych tylko jeśli użytkownik jest zalogowany
+        cv_upload_id = None
+        if current_user.is_authenticated:
+            cv_upload = CVUpload(user_id=current_user.id,
+                                 filename=original_filename,
+                                 original_text=cv_text,
+                                 job_title=request.form.get('job_title', ''),
+                                 job_description=request.form.get(
+                                     'job_description', ''))
+            db.session.add(cv_upload)
+            db.session.commit()
+            cv_upload_id = cv_upload.id
 
         # Store CV data in session for processing
         session['cv_text'] = cv_text
@@ -632,7 +634,7 @@ def upload_cv():
         session['original_filename'] = original_filename
         session['job_title'] = request.form.get('job_title', '')
         session['job_description'] = request.form.get('job_description', '')
-        session['cv_upload_id'] = cv_upload.id
+        session['cv_upload_id'] = cv_upload_id
 
         return jsonify({
             'success': True,

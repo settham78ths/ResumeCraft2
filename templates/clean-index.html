@@ -382,9 +382,9 @@
 <div class="container" id="upload-section">
 
     {% if not current_user.is_authenticated %}
-    <div class="alert alert-info" role="alert">
-        <h5><i class="fas fa-info-circle me-2"></i>Zaloguj się, aby korzystać z aplikacji</h5>
-        <p class="mb-2">Potrzebujesz konta, aby przesłać CV i skorzystać z optymalizacji AI.</p>
+    <div class="alert alert-warning" role="alert">
+        <h5><i class="fas fa-info-circle me-2"></i>Tryb gościa</h5>
+        <p class="mb-2">Możesz przesłać CV jako gość, ale aby korzystać z pełnych funkcji i zapisywać historię, zalecamy założenie konta.</p>
         <a href="{{ url_for('login') }}" class="btn btn-primary me-2">Zaloguj się</a>
         <a href="{{ url_for('register') }}" class="btn btn-outline-primary">Utwórz konto</a>
     </div>
