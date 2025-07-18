@@ -3,19 +3,10 @@ modules = ["python-3.11"]
 packages = ["unzip"]
 
 [workflows]
-runButton = "Start CV Optimizer"
+runButton = "Run CV Optimizer Pro"
 
 [[workflows.workflow]]
 name = "Run CV Optimizer Pro"
-author = 45165629
-mode = "sequential"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "python app.py"
-
-[[workflows.workflow]]
-name = "Start CV Optimizer"
 author = 45165629
 mode = "sequential"
 

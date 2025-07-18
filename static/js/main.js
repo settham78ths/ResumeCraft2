@@ -528,55 +528,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize analyze job button - check if it exists first
     const analyzeJobBtn = document.getElementById('analyze-job-btn');
-    
-    if (analyzeJobBtn) {
-        analyzeJobBtn.addEventListener('click', function() {
-            const jobUrl = document.getElementById('job-url').value;
-            const jobDescription = document.getElementById('job-description').value;
-            
-            if (!jobUrl && !jobDescription) {
-                alert('Podaj URL oferty pracy lub opis stanowiska');
-                return;
-            }
-            
-            // Analyze job posting
-            fetch('/analyze-job-posting', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    job_url: jobUrl,
-                    job_description: jobDescription,
-                    language: 'pl'
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    displayJobAnalysis(data.analysis);
-                } else {
-                    alert('Błąd podczas analizy: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Wystąpił błąd podczas analizy stanowiska');
-            });
-        });
-    }
 
-    function displayJobAnalysis(analysis) {
-        const resultDiv = document.getElementById('job-analysis-result');
-        if (resultDiv) {
-            resultDiv.innerHTML = `
-                <div class="analysis-result">
-                    <h3>Analiza stanowiska:</h3>
-                    <pre>${JSON.stringify(analysis, null, 2)}</pre>
-                </div>
-            `;
-        }
-    }
+    // Only add event listeners if elements exist
     if (analyzeJobBtn) {
         analyzeJobBtn.addEventListener('click', async function() {
             const jobDescription = document.getElementById('job-description').value;
