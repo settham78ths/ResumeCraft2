@@ -3,6 +3,7 @@ import logging
 from tempfile import mkdtemp
 from datetime import datetime, timedelta
 from flask import Flask, render_template, request, jsonify, session, flash, redirect, url_for
+from flask_session import Session
 from werkzeug.utils import secure_filename
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_bcrypt import Bcrypt
@@ -40,8 +41,13 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key")
 
-# Enhanced session security
+# Enhanced session security with server-side storage
 app.config.update(
+    SESSION_TYPE='filesystem',  # Store sessions on server filesystem
+    SESSION_FILE_DIR=mkdtemp(),  # Temporary directory for session files
+    SESSION_PERMANENT=False,
+    SESSION_USE_SIGNER=True,
+    SESSION_KEY_PREFIX='cvopt:',
     SESSION_COOKIE_SECURE=True,  # HTTPS only
     SESSION_COOKIE_HTTPONLY=True,  # No JavaScript access
     SESSION_COOKIE_SAMESITE='Lax',  # CSRF protection
@@ -72,6 +78,7 @@ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
 # Initialize extensions
 db.init_app(app)
 bcrypt = Bcrypt(app)
+Session(app)  # Initialize server-side sessions
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
