@@ -3,6 +3,11 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+import logging
+from flask import request, jsonify
+
+logger = logging.getLogger(__name__)
+
 class SecurityMiddleware:
     def __init__(self):
         self.blocked_ips = set()
@@ -50,6 +55,15 @@ class SecurityMiddleware:
 
         return None
 
+        # Check form data
+        if request.form:
+            for value in request.form.values():
+                if self._contains_suspicious_content(value):
+                    logger.warning(f"Suspicious form data from {ip}")
+                    return jsonify({'error': 'Invalid request'}), 400
+
+        return None
+
     def _contains_suspicious_content(self, content: str) -> bool:
         """Check if content contains suspicious patterns"""
         content_lower = content.lower()
@@ -80,30 +94,4 @@ class SecurityMiddleware:
         self.blocked_ips.add(ip)
         logger.info(f"IP blocked: {ip}")
 
-    def is_suspicious_content(self, data):
-        """Check if request contains suspicious content"""
-        if not data:
-            return False
-
-        data_str = str(data).lower()
-
-        # Check for suspicious patterns (exclude legitimate CV content)
-        suspicious_patterns = [
-            '<script>', '<iframe', 'javascript:', 'vbscript:',
-            'document.cookie', 'window.location'
-        ]
-
-        # Don't flag legitimate CV processing terms
-        cv_terms = [
-            'optimize', 'feedback', 'cover_letter', 'ats_check',
-            'interview_questions', 'cv_score', 'keyword_analysis',
-            'grammar_check', 'position_optimization'
-        ]
-
-        # If it contains CV terms, it's likely legitimate
-        if any(term in data_str for term in cv_terms):
-            return False
-
-        return any(pattern in data_str for pattern in suspicious_patterns)
-
-security_middleware = SecurityMiddleware()
+    security_middleware = SecurityMiddleware()
