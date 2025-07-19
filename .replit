@@ -4,6 +4,7 @@ packages = ["cargo", "freetype", "glibcLocales", "libiconv", "libxcrypt", "opens
 channel = "stable-24_05"
 
 [workflows]
+runButton = "Run CV Optimizer Pro"
 
 [[workflows.workflow]]
 name = "Run CV Optimizer Pro"
