@@ -134,9 +134,10 @@ def add_watermark_to_cv(cv_text):
 
 def parse_ai_json_response(ai_result):
     """
-    Parse JSON response from AI, handling various formats
+    Parse JSON response from AI, handling various formats and control characters
     """
     import json
+    import re
     try:
         logger.debug(f"AI result before parsing: {str(ai_result)[:200]}...")
 
@@ -160,7 +161,14 @@ def parse_ai_json_response(ai_result):
             json_end = clean_result.rfind('}') + 1
             clean_result = clean_result[json_start:json_end]
 
-        parsed_result = json.loads(clean_result)
+        # Sanitize the response to remove invalid control characters
+        # Remove control characters except for allowed ones (tab, newline, carriage return)
+        sanitized_result = re.sub(r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]', '', clean_result)
+        
+        # Also handle Unicode control characters that might cause issues
+        sanitized_result = re.sub(r'[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]', '', sanitized_result)
+
+        parsed_result = json.loads(sanitized_result)
         
         # Return the parsed JSON object
         logger.debug(f"Successfully parsed AI response as JSON")
@@ -168,7 +176,21 @@ def parse_ai_json_response(ai_result):
 
     except (json.JSONDecodeError, TypeError) as e:
         logger.warning(f"Failed to parse AI response as JSON: {e}")
-        # Return as dict with original content if parsing fails
+        # Try one more time with even more aggressive cleaning
+        try:
+            if isinstance(ai_result, str):
+                # Remove all non-printable characters except whitespace
+                ultra_clean = re.sub(r'[^\x20-\x7E\t\n\r\u00A0-\uFFFF]', '', str(ai_result))
+                # Try to extract just the JSON part
+                json_match = re.search(r'\{.*\}', ultra_clean, re.DOTALL)
+                if json_match:
+                    parsed_result = json.loads(json_match.group())
+                    logger.debug(f"Successfully parsed AI response with aggressive cleaning")
+                    return parsed_result
+        except:
+            pass
+        
+        # Return as dict with original content if all parsing fails
         return {"optimized_cv": str(ai_result), "error": "Failed to parse JSON"}
 
 

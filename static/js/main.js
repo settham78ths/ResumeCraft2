@@ -527,6 +527,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Analyze job posting button
+    analyzeJobBtn = document.getElementById('analyzeJobBtn');
     if (analyzeJobBtn) {
         analyzeJobBtn.addEventListener('click', async function() {
             const jobDescription = document.getElementById('job-description').value;
