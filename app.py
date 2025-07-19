@@ -3,7 +3,6 @@ import logging
 from tempfile import mkdtemp
 from datetime import datetime, timedelta
 from flask import Flask, render_template, request, jsonify, session, flash, redirect, url_for
-from flask_session import Session
 from werkzeug.utils import secure_filename
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_bcrypt import Bcrypt
@@ -41,13 +40,8 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key")
 
-# Enhanced session security with server-side storage
+# Enhanced session security
 app.config.update(
-    SESSION_TYPE='filesystem',  # Store sessions on server filesystem
-    SESSION_FILE_DIR=mkdtemp(),  # Temporary directory for session files
-    SESSION_PERMANENT=False,
-    SESSION_USE_SIGNER=True,
-    SESSION_KEY_PREFIX='cvopt:',
     SESSION_COOKIE_SECURE=True,  # HTTPS only
     SESSION_COOKIE_HTTPONLY=True,  # No JavaScript access
     SESSION_COOKIE_SAMESITE='Lax',  # CSRF protection
@@ -78,7 +72,6 @@ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
 # Initialize extensions
 db.init_app(app)
 bcrypt = Bcrypt(app)
-Session(app)  # Initialize server-side sessions
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
@@ -533,6 +526,7 @@ def compare_cv_versions():
 
 
 @app.route('/upload-cv', methods=['POST'])
+@login_required
 @rate_limit('cv_upload')
 def upload_cv():
     if 'cv_file' not in request.files:
@@ -615,18 +609,15 @@ def upload_cv():
                 f"Sugestie: {'; '.join(validation_results['suggestions'])}",
                 'info')
 
-        # Zapisz CV w bazie danych tylko jeśli użytkownik jest zalogowany
-        cv_upload_id = None
-        if current_user.is_authenticated:
-            cv_upload = CVUpload(user_id=current_user.id,
-                                 filename=original_filename,
-                                 original_text=cv_text,
-                                 job_title=request.form.get('job_title', ''),
-                                 job_description=request.form.get(
-                                     'job_description', ''))
-            db.session.add(cv_upload)
-            db.session.commit()
-            cv_upload_id = cv_upload.id
+        # Zapisz CV w bazie danych
+        cv_upload = CVUpload(user_id=current_user.id,
+                             filename=original_filename,
+                             original_text=cv_text,
+                             job_title=request.form.get('job_title', ''),
+                             job_description=request.form.get(
+                                 'job_description', ''))
+        db.session.add(cv_upload)
+        db.session.commit()
 
         # Store CV data in session for processing
         session['cv_text'] = cv_text
@@ -634,7 +625,7 @@ def upload_cv():
         session['original_filename'] = original_filename
         session['job_title'] = request.form.get('job_title', '')
         session['job_description'] = request.form.get('job_description', '')
-        session['cv_upload_id'] = cv_upload_id
+        session['cv_upload_id'] = cv_upload.id
 
         return jsonify({
             'success': True,

@@ -1,7 +1,6 @@
 modules = ["python-3.11"]
 [nix]
-packages = ["cargo", "freetype", "glibcLocales", "libiconv", "libxcrypt", "openssl", "pkg-config", "rustc", "unzip"]
-channel = "stable-24_05"
+packages = ["unzip"]
 
 [workflows]
 runButton = "Run CV Optimizer Pro"
@@ -16,5 +15,12 @@ task = "shell.exec"
 args = "python app.py"
 
 [[ports]]
+localPort = 5001
+externalPort = 3000
+
+[[ports]]
+localPort = 5002
+externalPort = 80
+
+[[ports]]
 localPort = 5003
-externalPort = 3001

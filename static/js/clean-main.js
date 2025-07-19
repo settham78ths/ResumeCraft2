@@ -1,10 +1,5 @@
 // Czysty, prosty JavaScript dla CV Optimizer Pro
 document.addEventListener('DOMContentLoaded', function() {
-    // Check if elements exist before adding event listeners
-    const analyzeJobBtn = document.getElementById('analyzeJobBtn');
-    const uploadCvBtn = document.getElementById('uploadCvBtn');
-    const processCvBtn = document.getElementById('processCvBtn');
-
     // Elementy formularza
     const cvUploadForm = document.getElementById('cv-upload-form');
     const cvFileInput = document.getElementById('cv-file');
@@ -30,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const resultContainer = document.getElementById('result-container');
     const copyResultBtn = document.getElementById('copy-result-btn');
     const compareVersionsBtn = document.getElementById('compare-versions-btn');
-
+    
     // Elementy automatycznego wyciągania informacji z linku
     const extractJobBtn = document.getElementById('extract-job-btn');
     const extractionStatus = document.getElementById('extraction-status');
@@ -38,20 +33,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Przechowywanie tekstu CV
     let cvText = '';
-
-    // Only add event listeners if elements exist
-    if (analyzeJobBtn) {
-        analyzeJobBtn.addEventListener('click', analyzeJobPosting);
-    }
-
-    if (uploadCvBtn) {
-        uploadCvBtn.addEventListener('click', uploadCV);
-    }
-
-    if (processCvBtn) {
-        processCvBtn.addEventListener('click', processCV);
-    }
-
 
     // Obsługa przesyłania CV
     if (cvUploadForm) {
@@ -81,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => {
                 if (data.success) {
                     cvText = data.cv_text;
-
+                    
                     // Pokaż podgląd CV
                     if (cvTextDisplay) {
                         cvTextDisplay.innerHTML = formatText(cvText);
@@ -232,7 +213,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (copyResultBtn) {
         copyResultBtn.addEventListener('click', function() {
             if (!resultContainer) return;
-
+            
             const textToCopy = resultContainer.innerText;
             navigator.clipboard.writeText(textToCopy).then(
                 function() {
@@ -295,18 +276,18 @@ document.addEventListener('DOMContentLoaded', function() {
     if (extractJobBtn) {
         extractJobBtn.addEventListener('click', function() {
             const jobUrl = jobUrlInput ? jobUrlInput.value.trim() : '';
-
+            
             if (!jobUrl) {
                 showError('Proszę wkleić link do oferty pracy.');
                 return;
             }
-
+            
             // Sprawdź czy URL wygląda poprawnie
             if (!isValidUrl(jobUrl)) {
                 showError('Proszę podać prawidłowy link do oferty pracy.');
                 return;
             }
-
+            
             // Pokaż status wyciągania
             if (extractionStatus) {
                 extractionStatus.style.display = 'block';
@@ -315,15 +296,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     extractionMessage.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Wyciąganie informacji z oferty...';
                 }
             }
-
+            
             // Wyłącz przycisk podczas przetwarzania
             extractJobBtn.disabled = true;
             extractJobBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Wyciąganie...';
-
+            
             hideAlerts();
-
+            
             // Wyślij zapytanie do serwera
-            fetch('/analyze-job-posting', {
+            fetch('/extract-job-info', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -335,7 +316,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => {
                 console.log('📡 Response status:', response.status);
                 console.log('📡 Response headers:', response.headers);
-
+                
                 if (!response.ok) {
                     console.error('❌ HTTP Error:', response.status, response.statusText);
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -346,43 +327,43 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log('📊 Response data:', data);
                 if (data.success) {
                     // Wypełnij automatycznie pola
-                    if (data.analysis && data.analysis.job_title && jobTitleInput) {
-                        jobTitleInput.value = data.analysis.job_title;
+                    if (data.job_title && jobTitleInput) {
+                        jobTitleInput.value = data.job_title;
                         // Dodaj efekt highlight
                         jobTitleInput.style.backgroundColor = '#d4edda';
                         setTimeout(() => {
                             jobTitleInput.style.backgroundColor = '';
                         }, 2000);
                     }
-
-                    if (data.raw_description && jobDescriptionInput) {
-                        jobDescriptionInput.value = data.raw_description;
+                    
+                    if (data.job_description && jobDescriptionInput) {
+                        jobDescriptionInput.value = data.job_description;
                         // Dodaj efekt highlight
                         jobDescriptionInput.style.backgroundColor = '#d4edda';
                         setTimeout(() => {
                             jobDescriptionInput.style.backgroundColor = '';
                         }, 2000);
                     }
-
+                    
                     // Pokaż sukces
                     if (extractionStatus && extractionMessage) {
                         extractionStatus.className = 'alert alert-success';
                         extractionMessage.innerHTML = `<i class="fas fa-check-circle me-2"></i>${data.message}`;
-
+                        
                         // Ukryj status po 5 sekundach
                         setTimeout(() => {
                             extractionStatus.style.display = 'none';
                         }, 5000);
                     }
-
+                    
                     // Pokaż dodatkowe informacje o firmie
                     if (data.company) {
                         console.log(`Znaleziona firma: ${data.company}`);
                     }
-
+                    
                 } else {
                     showError(data.message || 'Nie udało się wyciągnąć informacji z linku.');
-
+                    
                     if (extractionStatus && extractionMessage) {
                         extractionStatus.className = 'alert alert-danger';
                         extractionMessage.innerHTML = `<i class="fas fa-exclamation-circle me-2"></i>${data.message}`;
@@ -392,7 +373,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(error => {
                 console.error('Error:', error);
                 showError('Wystąpił błąd podczas wyciągania informacji z linku.');
-
+                
                 if (extractionStatus && extractionMessage) {
                     extractionStatus.className = 'alert alert-danger';
                     extractionMessage.innerHTML = '<i class="fas fa-exclamation-circle me-2"></i>Wystąpił błąd podczas wyciągania informacji.';
@@ -419,7 +400,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function formatText(text) {
         if (!text) return '<p class="text-muted">Brak tekstu</p>';
-
+        
         return text
             .replace(/\n/g, '<br>')
             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')

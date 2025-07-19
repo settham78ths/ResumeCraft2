@@ -526,12 +526,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Initialize analyze job button - check if it exists first
-    const analyzeJobBtn = document.getElementById('analyze-job-btn');
-
+    // Analyze job posting button
     if (analyzeJobBtn) {
         analyzeJobBtn.addEventListener('click', async function() {
-            const jobUrl = document.getElementById('job-url').value;
             const jobDescription = document.getElementById('job-description').value;
 
             // Validate if job description is not empty

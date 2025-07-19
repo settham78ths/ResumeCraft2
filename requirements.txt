@@ -20,4 +20,3 @@ requests
 stripe
 trafilatura
 wtforms
-Flask-Session
