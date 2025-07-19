@@ -669,6 +669,15 @@ document.addEventListener('DOMContentLoaded', function() {
 function generateCV() {
     console.log('generateCV called');
 
+    // Check if user is authenticated
+    {% if not current_user.is_authenticated %}
+    showNotification('Musisz być zalogowany, aby generować CV', 'warning');
+    setTimeout(() => {
+        window.location.href = '/login';
+    }, 2000);
+    return;
+    {% endif %}
+
     if (!validateStep(4)) {
         return;
     }
