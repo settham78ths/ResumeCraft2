@@ -113,8 +113,4 @@ class CVValidator:
         
         return max(0, min(100, score))
 
-# Create instance for import
 cv_validator = CVValidator()
-
-# Also export the class
-__all__ = ['CVValidator', 'cv_validator']

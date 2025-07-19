@@ -1,18 +1,11 @@
-modules = ["python-3.11"]
+language = "python3"
+run = "python app.py"
+
 [nix]
-packages = ["cargo", "freetype", "glibcLocales", "libiconv", "libxcrypt", "openssl", "pkg-config", "rustc", "unzip"]
+channel = "stable-22_11"
+
+[deployment]
+run = ["sh", "-c", "python app.py"]
 
 [workflows]
 runButton = "Run CV Optimizer Pro"
-
-[[workflows.workflow]]
-name = "Run CV Optimizer Pro"
-author = 45165629
-mode = "sequential"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "python app.py"
-
-[[ports]]
-localPort = 5003

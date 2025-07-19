@@ -1178,63 +1178,6 @@ def summarize_job_description(job_text):
 
     return send_api_request(prompt, max_tokens=1500)
 
-def generate_complete_cv_content(target_position, experience_level, industry, brief_background, language='pl'):
-    """
-    Generate complete CV content using AI based on basic user information
-    """
-    prompt = f"""
-    TASK: Wygeneruj kompletną treść CV w języku polskim na podstawie podstawowych informacji użytkownika.
-
-    DANE WEJŚCIOWE:
-    - Docelowe stanowisko: {target_position}
-    - Poziom doświadczenia: {experience_level}
-    - Branża: {industry}
-    - Krótkie tło: {brief_background}
-
-    Wygeneruj profesjonalną treść CV w formacie JSON z następującymi sekcjami:
-
-    {{
-        "professional_title": "Tytuł zawodowy odpowiedni dla stanowiska",
-        "professional_summary": "Profesjonalne podsumowanie 3-4 zdania",
-        "experience_suggestions": [
-            {{
-                "title": "Stanowisko",
-                "company": "Nazwa firmy",
-                "startDate": "2020-01",
-                "endDate": "2023-12",
-                "description": "Opis obowiązków i osiągnięć"
-            }}
-        ],
-        "education_suggestions": [
-            {{
-                "degree": "Kierunek studiów",
-                "school": "Nazwa uczelni",
-                "startYear": "2016",
-                "endYear": "2020"
-            }}
-        ],
-        "skills_list": "JavaScript, React, CSS, HTML, komunikatywność, praca w zespole"
-    }}
-
-    Dostosuj treść do poziomu doświadczenia ({experience_level}) i branży ({industry}).
-    Używaj tylko języka polskiego.
-    Zwróć tylko poprawny JSON bez dodatkowych komentarzy.
-    """
-
-    try:
-        response = send_api_request(prompt, max_tokens=2000)
-        return response
-    except Exception as e:
-        logger.error(f"Error generating complete CV content: {str(e)}")
-        # Return fallback structure
-        return {
-            "professional_title": target_position,
-            "professional_summary": f"Doświadczony specjalista w dziedzinie {industry}.",
-            "experience_suggestions": [],
-            "education_suggestions": [],
-            "skills_list": "Komunikatywność, Praca w zespole, Rozwiązywanie problemów"
-        }
-
 def ats_optimization_check(cv_text, job_description="", language='pl'):
     """
     Check CV against ATS (Applicant Tracking System) and provide suggestions for improvement
