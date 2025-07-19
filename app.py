@@ -6,6 +6,7 @@ from flask import Flask, render_template, request, jsonify, session, flash, redi
 from werkzeug.utils import secure_filename
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_bcrypt import Bcrypt
+from flask_session import Session
 import uuid
 import stripe
 import json
@@ -43,12 +44,19 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key")
 
-# Enhanced session security
+# Enhanced session security with server-side storage
 app.config.update(
     SESSION_COOKIE_SECURE=True,  # HTTPS only
     SESSION_COOKIE_HTTPONLY=True,  # No JavaScript access
     SESSION_COOKIE_SAMESITE='Lax',  # CSRF protection
-    PERMANENT_SESSION_LIFETIME=timedelta(hours=24)  # Session timeout
+    PERMANENT_SESSION_LIFETIME=timedelta(hours=24),  # Session timeout
+    SESSION_TYPE='filesystem',  # Store sessions on server filesystem
+    SESSION_PERMANENT=False,
+    SESSION_USE_SIGNER=True,
+    SESSION_KEY_PREFIX='cv_optimizer:',
+    SESSION_FILE_DIR=mkdtemp(),  # Temporary directory for session files
+    SESSION_FILE_THRESHOLD=500,  # Maximum number of sessions
+    SESSION_FILE_MODE=384  # File permissions (0600 in octal)
 )
 
 # Database configuration
@@ -77,6 +85,9 @@ db.init_app(app)
 bcrypt = Bcrypt(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
+
+# Initialize server-side sessions
+Session(app)
 login_manager.login_view = 'login'
 login_manager.login_message = 'Zaloguj się, aby uzyskać dostęp do tej strony.'
 login_manager.login_message_category = 'info'
