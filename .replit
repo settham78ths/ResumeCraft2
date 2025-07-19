@@ -1,4 +1,4 @@
-modules = ["python-3.11"]
+modules = ["python-3.11", "postgresql-16"]
 [nix]
 packages = ["cargo", "freetype", "glibcLocales", "libiconv", "libxcrypt", "openssl", "pkg-config", "rustc", "unzip"]
 
@@ -16,3 +16,4 @@ args = "python app.py"
 
 [[ports]]
 localPort = 5003
+externalPort = 80
