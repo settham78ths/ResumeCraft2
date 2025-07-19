@@ -1,6 +1,6 @@
 modules = ["python-3.11"]
 [nix]
-packages = ["unzip"]
+packages = ["cargo", "freetype", "glibcLocales", "libiconv", "libxcrypt", "openssl", "pkg-config", "rustc", "unzip"]
 
 [workflows]
 runButton = "Run CV Optimizer Pro"
@@ -13,14 +13,6 @@ mode = "sequential"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "python app.py"
-
-[[ports]]
-localPort = 5001
-externalPort = 3000
-
-[[ports]]
-localPort = 5002
-externalPort = 80
 
 [[ports]]
 localPort = 5003
